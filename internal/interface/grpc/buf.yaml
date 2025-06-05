@@ -1,0 +1,20 @@
+version: v2
+modules:
+  - path: protobufs
+    name: buf.build/ose-micro/ose-postman
+    lint:
+      use:
+        - DEFAULT
+
+      disallow_comment_ignores: true
+      enum_zero_value_suffix: _UNSPECIFIED
+      rpc_allow_same_request_response: false
+      rpc_allow_google_protobuf_empty_requests: false
+      rpc_allow_google_protobuf_empty_responses: false
+      service_suffix: Service
+lint:
+  use:
+    - DEFAULT
+breaking:
+  use:
+    - FILE

@@ -1,0 +1,42 @@
+{
+  "service": {
+    "name": "",
+    "logger": {
+      "environment": "",
+      "level": "info"
+    },
+    "tracer": {
+      "endpoint": "",
+      "serviceName": "ose-postman",
+      "sampleRatio": 1.0
+    }
+  },
+  "bus": {
+    "address": ""
+  },
+  "grpc": {
+    "port": 0
+  },
+  "postgres": {
+    "host": "",
+    "port": 0,
+    "user": "",
+    "database": "",
+    "password": "",
+    "sslMode": false
+  },
+  "mailer": {
+    "host": "",
+    "username": "",
+    "password": "",
+    "port": 0
+  },
+  "mongo": {
+    "host": "",
+    "port": 0,
+    "timeout": "3s",
+    "user": "",
+    "password": "",
+    "database": ""
+  }
+}

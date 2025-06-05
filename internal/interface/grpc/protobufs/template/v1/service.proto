@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package template.v1;
+
+import "template/v1/data.proto";
+
+service TemplateService {
+  rpc Create(template.v1.CreateRequest) returns (template.v1.CreateResponse);
+  rpc Read(template.v1.ReadRequest) returns (template.v1.ReadResponse);
+  rpc ReadOne(template.v1.ReadOneRequest) returns (template.v1.ReadOneResponse);
+  rpc Update(template.v1.UpdateRequest) returns (template.v1.UpdateResponse);
+  rpc Delete(template.v1.DeleteRequest) returns (template.v1.DeleteResponse);
+}

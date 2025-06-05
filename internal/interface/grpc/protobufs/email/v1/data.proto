@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+package email.v1;
+
+import "common/v1/common.proto";
+import "google/protobuf/timestamp.proto";
+
+enum State {
+  StateUnknown = 0;
+  StateFailed = 1;
+  StateComplete = 2;
+}
+
+message Email {
+  string id = 1;
+  string recipient = 2;
+  repeated common.v1.Field data = 3;
+  string subject = 4;
+  string sender = 5;
+  string from = 6;
+  string template = 7;
+  string message = 8;
+  State state = 9;
+  google.protobuf.Timestamp created_at = 10;
+  google.protobuf.Timestamp updated_at = 11;
+}
+
+message CreateRequest {
+  string recipient = 1;
+  repeated common.v1.Field data = 2;
+  string sender = 3;
+  string template = 4;
+  string from = 5;
+}
+
+message CreateResponse {
+  string message = 1;
+  Email record = 2;
+}
+
+message ResendRequest {
+  string id = 1;
+}
+
+message ResendResponse {
+  string message = 1;
+}
+
+message ReadOneRequest {
+  repeated common.v1.Filter filter = 1;
+}
+
+message ReadOneResponse {
+  string message = 1;
+  Email record = 2;
+}
+
+message ReadRequest {
+  common.v1.Request request = 1;
+}
+
+message ReadResponse {
+  common.v1.Request request = 1;
+  int64 size = 2;
+  repeated Email records = 3;
+}
+
+message DeleteRequest {
+  string id = 1;
+}
+
+message DeleteResponse {
+  string message = 1;
+  Email record = 2;
+}

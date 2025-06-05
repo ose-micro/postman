@@ -1,0 +1,31 @@
+package nats
+
+import (
+	"encoding/json"
+	"fmt"
+
+	"github.com/moriba-cloud/ose-postman/internal/app"
+	"github.com/ose-micro/core/logger"
+	"github.com/ose-micro/cqrs/bus"
+)
+
+func InvokeConsumers(events app.Events, log logger.Logger, bus bus.Bus) {
+	newTemplateConsumer(events.Template, bus)
+	newEmailConsumer(events.Email, bus)
+}
+
+func toByte(data interface{}) ([]byte, error) {
+	   // This is likely a map[string]interface{}
+    mapData, ok := data.(map[string]interface{})
+    if !ok {
+        return nil, fmt.Errorf("invalid message format")
+    }
+
+    // Marshal it to JSON
+    raw, err := json.Marshal(mapData)
+    if err != nil {
+        return nil, fmt.Errorf("failed to marshal map: %w", err)
+    }
+
+	return raw, nil
+}

@@ -1,0 +1,69 @@
+syntax = "proto3";
+
+package common.v1;
+
+import "google/protobuf/timestamp.proto";
+
+enum Operator {
+  UNKNOWN_FILTER = 0;
+  EQUAL = 1;
+  LIKE = 2;
+  BETWEEN = 3;
+  GREATER_THAN = 4;
+  LESS_THAN = 5;
+  GREATER_THAN_EQUAL = 6;
+  LESS_THAN_EQUAL = 7;
+  DIFFERENCE = 8;
+  DATE_EQUAL = 9;
+  BEFORE = 10;
+  AFTER = 11;
+  DATE_BETWEEN = 12;
+}
+
+enum Logical {
+  UNKNOWN_LOGICAL = 0;
+  AND = 1;
+  OR = 2;
+}
+
+enum Order {
+  UNKNOWN_ORDER = 0;
+  ASC = 1;
+  DESC = 2;
+}
+
+message Filter {
+  string field = 1;
+  Operator operator = 2;
+  oneof value {
+    string string_value = 3;
+    int32 int32_value = 4;
+    google.protobuf.Timestamp time_value = 5;
+    Values values_value = 6;
+  }
+}
+
+message Values {
+  repeated string values = 1;
+}
+
+message Sort {
+  string field = 1;
+  Order order = 2;
+}
+
+message Pagination {
+  int32 page = 1;
+  int32 limit = 2;
+}
+
+message Request {
+  Pagination pagination = 1;
+  repeated Filter filters = 2;
+  repeated Sort sort = 3;
+}
+
+message Field {
+  string field = 1;
+  string value = 2;
+}
