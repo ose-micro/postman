@@ -15,7 +15,6 @@ func InvokeConsumers(events app.Events, log logger.Logger, bus bus.Bus) {
 }
 
 func toByte(data interface{}) ([]byte, error) {
-	   // This is likely a map[string]interface{}
     mapData, ok := data.(map[string]interface{})
     if !ok {
         return nil, fmt.Errorf("invalid message format")

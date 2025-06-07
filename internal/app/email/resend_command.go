@@ -57,8 +57,8 @@ type resendCommandHandler struct {
 
 // Handle implements cqrs.CommandHandle.
 func (u *resendCommandHandler) Handle(ctx context.Context, command ResendCommand) (email.Domain, error) {
-	ctx, span := u.tracer.Start(ctx, "app.email.update.command.handler", trace.WithAttributes(
-		attribute.String("operation", "UPDATE"),
+	ctx, span := u.tracer.Start(ctx, "app.email.resend_mail.command.handler", trace.WithAttributes(
+		attribute.String("operation", "RESEND_MAIL"),
 		attribute.String("payload", fmt.Sprintf("%v", command)),
 	))
 	defer span.End()
@@ -70,9 +70,9 @@ func (u *resendCommandHandler) Handle(ctx context.Context, command ResendCommand
 	if err := command.Validate(); err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
-		u.log.Error("validation process fail",
+		u.log.Error("validation process failed",
 			zap.String("trace_id", traceId),
-			zap.String("operation", "UPDATE"),
+			zap.String("operation", "RESEND_MAIL"),
 			zap.Error(err),
 		)
 
@@ -89,7 +89,7 @@ func (u *resendCommandHandler) Handle(ctx context.Context, command ResendCommand
 		span.SetStatus(codes.Error, err.Error())
 		u.log.Error("failed to read email",
 			zap.String("trace_id", traceId),
-			zap.String("operation", "UPDATE"),
+			zap.String("operation", "RESEND_MAIL"),
 			zap.Error(err),
 		)
 
@@ -102,7 +102,7 @@ func (u *resendCommandHandler) Handle(ctx context.Context, command ResendCommand
 		span.SetStatus(codes.Error, err.Error())
 		u.log.Error("failed to send mail",
 			zap.String("trace_id", traceId),
-			zap.String("operation", "UPDATE"),
+			zap.String("operation", "RESEND_MAIL"),
 			zap.Error(err),
 		)
 
@@ -120,9 +120,9 @@ func (u *resendCommandHandler) Handle(ctx context.Context, command ResendCommand
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
-		u.log.Error("failed to send mail",
+		u.log.Error("failed to resend mail",
 			zap.String("trace_id", traceId),
-			zap.String("operation", "CREATE"),
+			zap.String("operation", "RESEND_MAIL"),
 			zap.Error(err),
 		)
 

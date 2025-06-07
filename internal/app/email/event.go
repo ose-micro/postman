@@ -74,7 +74,7 @@ func (e *emailEvent) Deleted(ctx context.Context, event cqrs.Event) error {
 func (e *emailEvent) Updated(ctx context.Context, event cqrs.Event) error {
 	ctx, span := e.tracer.Start(ctx, "app.email.event.updated", trace.WithAttributes(
 		attribute.String("operation", "UPDATE"),
-		attribute.String("payload", fmt.Sprintf("%v", event.(CreatedEvent))),
+		attribute.String("payload", fmt.Sprintf("%v", event.(UpdatedEvent))),
 	))
 	defer span.End()
 	
