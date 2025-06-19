@@ -19,7 +19,8 @@ RUN go build -o ose-postman ./cmd
 # ----- Run Stage -----
 FROM alpine:3.18
 
-# Install certs (for HTTPS, Mongo, etc.)
+RUN apk add --no-cache tzdata
+
 RUN apk --no-cache add ca-certificates
 
 WORKDIR /app
