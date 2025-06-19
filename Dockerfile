@@ -1,38 +1,34 @@
-# Use official Go base image
-FROM golang:1.24.3-alpine AS builder
+# ----- Build Stage -----
+FROM golang:1.21-alpine AS builder
 
-# Enable Go modules and CGO disabled for static binary
-ENV CGO_ENABLED=0 GOOS=linux GOARCH=amd64
+# Install necessary tools
+RUN apk add --no-cache git
 
 WORKDIR /app
 
-# Install git and clean up cache
-RUN apk add --no-cache git && apk --no-cache upgrade
-
-# Copy go files
+# Copy Go modules files
 COPY go.mod go.sum ./
 RUN go mod download
 
-# Copy the source
+# Copy the entire source code
 COPY . .
 
-# Build the binary
+# Build the app
 RUN go build -o ose-postman ./cmd
 
-# ─────────────────────────────
+# ----- Run Stage -----
+FROM alpine:3.18
 
-# Final lightweight image
-FROM alpine:latest
-
-# Add necessary packages for ca-certificates
+# Install certs (for HTTPS, Mongo, etc.)
 RUN apk --no-cache add ca-certificates
 
 WORKDIR /app
 
+# Copy the built binary
 COPY --from=builder /app/ose-postman .
 
-# Set timezone and environment variables if needed
-ENV TZ=UTC
+# Expose the gRPC port (adjust if needed)
+EXPOSE 50051
 
-# Command
-ENTRYPOINT ["./postman"]
+# Run the service
+CMD ["./ose-postman"]
