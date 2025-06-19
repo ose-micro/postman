@@ -17,7 +17,7 @@ type Domain struct {
 	timestamp timestamp.Timestamp
 	id        string
 	recipient string
-	sender    string
+	sender    *string
 	from      string
 	subject   string
 	template  string
@@ -31,7 +31,7 @@ type Domain struct {
 type Public struct {
 	Id        string                 `json:"id"`
 	Recipient string                 `json:"recipient"`
-	Sender    string                 `json:"sender"`
+	Sender    *string                `json:"sender"`
 	Subject   string                 `json:"subject"`
 	Data      map[string]interface{} `json:"data"`
 	Template  string                 `json:"template"`
@@ -45,7 +45,7 @@ type Public struct {
 type Params struct {
 	Id        string
 	Recipient string
-	Sender    string
+	Sender    *string
 	Subject   string
 	Data      map[string]interface{}
 	Template  string
@@ -68,7 +68,7 @@ func (d *Domain) GetData() map[string]interface{} {
 	return d.data
 }
 
-func (d *Domain) GetSender() string {
+func (d *Domain) GetSender() *string {
 	return d.sender
 }
 

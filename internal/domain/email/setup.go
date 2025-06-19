@@ -37,10 +37,6 @@ func (e emailDomain) Existing(param Params) (*Domain, error) {
 		fields = append(fields, "recipient is required")
 	}
 
-	if param.Sender == "" {
-		fields = append(fields, "sender is required")
-	}
-
 	if param.Subject == "" {
 		fields = append(fields, "subject is required")
 	}
@@ -91,10 +87,6 @@ func (e emailDomain) New(param Params) (*Domain, error) {
 
 	if param.Recipient == "" {
 		fields = append(fields, "recipient is required")
-	}
-
-	if param.Sender == "" {
-		fields = append(fields, "sender is required")
 	}
 
 	if param.Subject == "" {

@@ -19,7 +19,7 @@ import (
 type DeletedEvent struct {
 	Id        string
 	Recipient string
-	Sender    string
+	Sender    *string
 	Subject   string
 	Data      map[string]interface{}
 	Template  string

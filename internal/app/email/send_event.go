@@ -17,7 +17,7 @@ import (
 
 type SendMailEvent struct {
 	Recipient string                 `json:"recipient"`
-	Sender    string                 `json:"sender"`
+	Sender    *string                `json:"sender"`
 	Subject   string                 `json:"subject"`
 	Data      map[string]interface{} `json:"data"`
 	Template  string                 `json:"template"`

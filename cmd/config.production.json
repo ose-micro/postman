@@ -37,7 +37,6 @@
     "timeout": "3s",
     "user": "",
     "password": "",
-    "database": "",
-    "uri": "mongodb+srv://ishmaelkargbo:T8AwHOTNET7OA7aC@fundme.pnya2l2.mongodb.net/?retryWrites=true&w=majority&appName=fundme"
+    "database": ""
   }
 }

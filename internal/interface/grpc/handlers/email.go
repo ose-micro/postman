@@ -43,7 +43,13 @@ func (e *emailHandler) response(param emailDomain.Domain) *emailv1.Email {
 			return data
 		}(),
 		Subject:  param.GetSubject(),
-		Sender:   param.GetSender(),
+		Sender:   func () string {
+			if param.GetSender() == nil {
+				return ""
+			}
+
+			return param.GetSubject()
+		}(),
 		From:     param.GetFrom(),
 		Template: param.GetTemplate(),
 		Message:  param.GetMessage(),
@@ -72,7 +78,7 @@ func (e *emailHandler) Create(ctx context.Context, request *emailv1.CreateReques
 	traceId := trace.SpanContextFromContext(ctx).TraceID().String()
 	payload := email.CreateCommand{
 		Recipient: request.Recipient,
-		Sender:    request.Sender,
+		Sender:    &request.Sender,
 		Data: func() map[string]interface{} {
 			data := make(map[string]interface{})
 			for _, v := range request.Data {

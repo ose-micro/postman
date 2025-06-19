@@ -12,7 +12,7 @@ import (
 type Email struct {
 	Id        string `gorm:"primaryKey"`
 	Recipient string `gorm:"not null;index"`
-	Sender    string `gorm:"not null;index"`
+	Sender    *string `gorm:"not null;index"`
 	Subject   string `gorm:"not null;index"`
 	Data      string `gorm:"type:text"`
 	Template  string

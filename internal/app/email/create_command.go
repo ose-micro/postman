@@ -22,7 +22,7 @@ import (
 
 type CreateCommand struct {
 	Recipient string
-	Sender    string
+	Sender    *string
 	Data      map[string]interface{}
 	Template  string
 	From      string
@@ -39,10 +39,6 @@ func (c CreateCommand) Validate() error {
 
 	if c.Recipient == "" {
 		fields = append(fields, "recipient is required")
-	}
-
-	if c.Sender == "" {
-		fields = append(fields, "sender is required")
 	}
 
 	if c.Template == "" {
@@ -127,7 +123,7 @@ func (c *createCommandHandler) Handle(ctx context.Context, command CreateCommand
 
 	state := email.StateFailed
 	err = c.mailer.Send(ctx, mailer.Params{
-		Sender:    command.Sender,
+		Sender:    *command.Sender,
 		Recipient: command.Recipient,
 		Subject:   temp.GetSubject(),
 		Message:   temp.GetContent(),

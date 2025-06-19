@@ -110,7 +110,7 @@ func (u *resendCommandHandler) Handle(ctx context.Context, command ResendCommand
 	}
 
 	err = u.mailer.Send(ctx, mailer.Params{
-		Sender:    record.GetSender(),
+		Sender:    *record.GetSender(),
 		Recipient: record.GetRecipient(),
 		Subject:   record.GetSubject(),
 		Message:   record.GetMessage(),

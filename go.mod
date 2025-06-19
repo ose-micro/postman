@@ -4,11 +4,10 @@ go 1.24.1
 
 require (
 	github.com/lib/pq v1.10.9
-	github.com/nats-io/nats.go v1.43.0
 	github.com/ose-micro/core v0.0.7
 	github.com/ose-micro/grpc v0.0.4
 	github.com/ose-micro/mailer v0.0.2
-	github.com/ose-micro/mongo v0.0.3
+	github.com/ose-micro/mongo v0.0.5
 	github.com/ose-micro/postgres v0.1.0
 	go.mongodb.org/mongo-driver v1.17.3
 	go.opentelemetry.io/otel v1.36.0
@@ -18,6 +17,8 @@ require (
 	google.golang.org/grpc v1.72.2
 	google.golang.org/protobuf v1.36.6
 )
+
+require github.com/nats-io/nats.go v1.43.0 // indirect
 
 require (
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
