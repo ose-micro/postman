@@ -37,6 +37,7 @@
     "timeout": "3s",
     "user": "",
     "password": "",
-    "database": ""
+    "database": "",
+    "url": ""
   }
 }
