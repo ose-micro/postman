@@ -26,7 +26,7 @@ WORKDIR /app
 
 # Copy the built binary
 COPY --from=builder /app/ose-postman .
-COPY --from=builder /cmd/config.production.json /app/cmd/config.production.json
+COPY --from=builder /app/cmd/config.production.json ./cmd/config.production.json
 
 # Expose the gRPC port (adjust if needed)
 EXPOSE 50051
