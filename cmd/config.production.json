@@ -9,11 +9,6 @@
       "endpoint": "",
       "serviceName": "ose-postman",
       "sampleRatio": 1.0
-    },
-    "timestamp": {
-      "local": "Africa/Freetown",
-      "format": "2006-01-02 15:04:05",
-      "parse": "2006-01-02 15:04:05"
     }
   },
   "bus": {
@@ -42,7 +37,6 @@
     "timeout": "3s",
     "user": "",
     "password": "",
-    "database": "",
-    "url": ""
+    "database": ""
   }
 }

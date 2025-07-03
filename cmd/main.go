@@ -1,8 +1,6 @@
 package main
 
 import (
-	"log"
-
 	"github.com/moriba-cloud/ose-postman/internal/app"
 	"github.com/moriba-cloud/ose-postman/internal/domain"
 	"github.com/moriba-cloud/ose-postman/internal/interface/grpc"
@@ -59,8 +57,6 @@ func loadConfig() (config.Service, logger.Config, tracing.Config, timestamp.Conf
 		config.WithExtension("grpc", &grpcConfig),
 		config.WithExtension("mailer", &mailerConfig),
 	)
-
-	log.Println(&mongoConfig, "======")
 
 	if err != nil {
 		return config.Service{}, logger.Config{}, tracing.Config{}, timestamp.Config{},

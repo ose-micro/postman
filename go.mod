@@ -4,17 +4,17 @@ go 1.24.1
 
 require (
 	github.com/lib/pq v1.10.9
-	github.com/ose-micro/core v0.0.7
+	github.com/ose-micro/core v0.0.8
 	github.com/ose-micro/grpc v0.0.4
 	github.com/ose-micro/mailer v0.0.2
-	github.com/ose-micro/mongo v0.0.5
+	github.com/ose-micro/mongo v0.0.7
 	github.com/ose-micro/postgres v0.1.0
-	go.mongodb.org/mongo-driver v1.17.3
+	go.mongodb.org/mongo-driver v1.17.4
 	go.opentelemetry.io/otel v1.36.0
 	go.opentelemetry.io/otel/trace v1.36.0
 	go.uber.org/fx v1.24.0
-	go.uber.org/zap v1.27.0
-	google.golang.org/grpc v1.72.2
+	go.uber.org/zap v1.26.0
+	google.golang.org/grpc v1.72.1
 	google.golang.org/protobuf v1.36.6
 )
 
