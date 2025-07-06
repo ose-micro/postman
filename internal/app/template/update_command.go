@@ -3,7 +3,6 @@ package template
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/moriba-cloud/ose-postman/internal/domain"
 	"github.com/moriba-cloud/ose-postman/internal/domain/template"
@@ -18,43 +17,6 @@ import (
 	"go.uber.org/zap"
 )
 
-type UpdateCommand struct {
-	Id           string
-	Content      string
-	Subject      string
-	Placeholders []string
-}
-
-// CommandName implements cqrs.Command.
-func (u UpdateCommand) CommandName() string {
-	return template.UPDATED_COMMAND
-}
-
-// Validate implements cqrs.Command.
-func (u UpdateCommand) Validate() error {
-	fields := make([]string, 0)
-
-	if u.Id == "" {
-		fields = append(fields, "id is required")
-	}
-
-	if u.Content == "" {
-		fields = append(fields, "content is required")
-	}
-
-	if u.Subject == "" {
-		fields = append(fields, "subject is required")
-	}
-
-	if len(fields) > 0 {
-		return fmt.Errorf("%s", strings.Join(fields, ", "))
-	}
-
-	return nil
-}
-
-var _ cqrs.Command = CreateCommand{}
-
 // Handler
 type updateCommandHandler struct {
 	repo   template.Repository
@@ -65,7 +27,7 @@ type updateCommandHandler struct {
 }
 
 // Handle implements cqrs.CommandHandle.
-func (u *updateCommandHandler) Handle(ctx context.Context, command UpdateCommand) (template.Domain, error) {
+func (u *updateCommandHandler) Handle(ctx context.Context, command template.UpdateCommand) (template.Domain, error) {
 	ctx, span := u.tracer.Start(ctx, "app.template.update.command.handler", trace.WithAttributes(
 		attribute.String("operation", "UPDATE"),
 		attribute.String("payload", fmt.Sprintf("%v", command)),
@@ -153,7 +115,7 @@ func (u *updateCommandHandler) Handle(ctx context.Context, command UpdateCommand
 	}
 
 	// publish bus
-	err = u.bus.Publish(command.CommandName(), UpdatedEvent(record.MakePublic()))
+	err = u.bus.Publish(command.CommandName(), template.DefaultEvent(record.MakePublic()))
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
@@ -175,7 +137,7 @@ func (u *updateCommandHandler) Handle(ctx context.Context, command UpdateCommand
 }
 
 func newUpdateCommandHandler(bs domain.Domain, repo template.Repository, log logger.Logger,
-	tracer tracing.Tracer, bus bus.Bus) cqrs.CommandHandle[UpdateCommand, template.Domain] {
+	tracer tracing.Tracer, bus bus.Bus) cqrs.CommandHandle[template.UpdateCommand, template.Domain] {
 	return &updateCommandHandler{
 		repo:   repo,
 		log:    log,

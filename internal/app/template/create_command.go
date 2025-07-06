@@ -3,7 +3,6 @@ package template
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/moriba-cloud/ose-postman/internal/domain"
 	"github.com/moriba-cloud/ose-postman/internal/domain/template"
@@ -18,38 +17,6 @@ import (
 	"go.uber.org/zap"
 )
 
-type CreateCommand struct {
-	Content      string
-	Subject      string
-	Placeholders []string
-}
-
-// CommandName implements cqrs.Command.
-func (c CreateCommand) CommandName() string {
-	return template.CREATED_COMMAND
-}
-
-// Validate implements cqrs.Command.
-func (c CreateCommand) Validate() error {
-	fields := make([]string, 0)
-
-	if c.Content == "" {
-		fields = append(fields, "content is required")
-	}
-
-	if c.Subject == "" {
-		fields = append(fields, "subject is required")
-	}
-
-	if len(fields) > 0 {
-		return fmt.Errorf("%s", strings.Join(fields, ", "))
-	}
-
-	return nil
-}
-
-var _ cqrs.Command = CreateCommand{}
-
 // Handler
 type createCommandHandler struct {
 	repo   template.Repository
@@ -61,7 +28,7 @@ type createCommandHandler struct {
 }
 
 // Handle implements cqrs.CommandHandle.
-func (c *createCommandHandler) Handle(ctx context.Context, command CreateCommand) (template.Domain, error) {
+func (c *createCommandHandler) Handle(ctx context.Context, command template.CreateCommand) (template.Domain, error) {
 	ctx, span := c.tracer.Start(ctx, "app.template.create.command.handler", trace.WithAttributes(
 		attribute.String("operation", "CREATE"),
 		attribute.String("payload", fmt.Sprintf("%v", command)),
@@ -120,7 +87,7 @@ func (c *createCommandHandler) Handle(ctx context.Context, command CreateCommand
 	}
 
 	// publish bus
-	err = c.bus.Publish(command.CommandName(), CreatedEvent(domain.MakePublic()))
+	err = c.bus.Publish(command.CommandName(), template.DefaultEvent(domain.MakePublic()))
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
@@ -142,7 +109,7 @@ func (c *createCommandHandler) Handle(ctx context.Context, command CreateCommand
 }
 
 func newCreateCommandHandler(bs domain.Domain, repo template.Repository, log logger.Logger,
-	tracer tracing.Tracer, bus bus.Bus, mailer *mailer.Mailer) cqrs.CommandHandle[CreateCommand, template.Domain] {
+	tracer tracing.Tracer, bus bus.Bus, mailer *mailer.Mailer) cqrs.CommandHandle[template.CreateCommand, template.Domain] {
 	return &createCommandHandler{
 		repo:   repo,
 		log:    log,

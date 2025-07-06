@@ -3,7 +3,6 @@ package template
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/moriba-cloud/ose-postman/internal/domain"
 	"github.com/moriba-cloud/ose-postman/internal/domain/template"
@@ -16,22 +15,6 @@ import (
 	"go.uber.org/zap"
 )
 
-type DeletedEvent struct {
-	Id           string    `json:"id"`
-	Content      string    `json:"content"`
-	Subject      string    `json:"subject"`
-	Placeholders []string  `json:"placeholders"`
-	CreatedAt    time.Time `json:"createdAt"`
-	UpdatedAt    time.Time `json:"updatedAt"`
-}
-
-// EventName implements cqrs.Event.
-func (c DeletedEvent) EventName() string {
-	return "template.deleted.event"
-}
-
-var _ cqrs.Event = DeletedEvent{}
-
 type deletedEvent struct {
 	repo   template.Repository
 	log    logger.Logger
@@ -39,7 +22,7 @@ type deletedEvent struct {
 	bs     domain.Domain
 }
 
-func (d *deletedEvent) ToDomain(event DeletedEvent) (*template.Domain, error) {
+func (d *deletedEvent) ToDomain(event template.DefaultEvent) (*template.Domain, error) {
 	return d.bs.Template.Existing(template.Params{
 		Id:           event.Id,
 		Content:      event.Content,
@@ -51,7 +34,7 @@ func (d *deletedEvent) ToDomain(event DeletedEvent) (*template.Domain, error) {
 }
 
 // Handle implements cqrs.EventHandle.
-func (d *deletedEvent) Handle(ctx context.Context, event DeletedEvent) error {
+func (d *deletedEvent) Handle(ctx context.Context, event template.DefaultEvent) error {
 	ctx, span := d.tracer.Start(ctx, "app.template.event.deleted.handler", trace.WithAttributes(
 		attribute.String("operation", "DELETE"),
 		attribute.String("payload", fmt.Sprintf("%v", event)),
@@ -96,7 +79,7 @@ func (d *deletedEvent) Handle(ctx context.Context, event DeletedEvent) error {
 }
 
 func newDeletedEvent(bs domain.Domain, repo template.Repository, log logger.Logger,
-	tracer tracing.Tracer) cqrs.EventHandle[DeletedEvent] {
+	tracer tracing.Tracer) cqrs.EventHandle[template.DefaultEvent] {
 	return &deletedEvent{
 		repo:   repo,
 		log:    log,

@@ -18,21 +18,21 @@ import (
 type templateEvent struct {
 	log    logger.Logger
 	tracer tracing.Tracer
-	create cqrs.EventHandle[CreatedEvent]
-	update cqrs.EventHandle[UpdatedEvent]
-	delete cqrs.EventHandle[DeletedEvent]
+	create cqrs.EventHandle[template.DefaultEvent]
+	update cqrs.EventHandle[template.DefaultEvent]
+	delete cqrs.EventHandle[template.DefaultEvent]
 }
 
 // Created implements template.Event.
 func (t *templateEvent) Created(ctx context.Context, event cqrs.Event) error {
 	ctx, span := t.tracer.Start(ctx, "app.template.event.created", trace.WithAttributes(
 		attribute.String("operation", "CREATED"),
-		attribute.String("payload", fmt.Sprintf("%v", event.(CreatedEvent))),
+		attribute.String("payload", fmt.Sprintf("%v", event.(template.DefaultEvent))),
 	))
 	defer span.End()
 
 	traceId := trace.SpanContextFromContext(ctx).TraceID().String()
-	if err := t.create.Handle(ctx, event.(CreatedEvent)); err != nil {
+	if err := t.create.Handle(ctx, event.(template.DefaultEvent)); err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
 		t.log.Error("failed to process event",
@@ -50,12 +50,12 @@ func (t *templateEvent) Created(ctx context.Context, event cqrs.Event) error {
 func (t *templateEvent) Deleted(ctx context.Context, event cqrs.Event) error {
 	ctx, span := t.tracer.Start(ctx, "app.template.event.deleted", trace.WithAttributes(
 		attribute.String("operation", "DELETED"),
-		attribute.String("payload", fmt.Sprintf("%v", event.(DeletedEvent))),
+		attribute.String("payload", fmt.Sprintf("%v", event.(template.DefaultEvent))),
 	))
 	defer span.End()
 
 	traceId := trace.SpanContextFromContext(ctx).TraceID().String()
-	if err := t.delete.Handle(ctx, event.(DeletedEvent)); err != nil {
+	if err := t.delete.Handle(ctx, event.(template.DefaultEvent)); err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
 		t.log.Error("failed to process event",
@@ -73,12 +73,12 @@ func (t *templateEvent) Deleted(ctx context.Context, event cqrs.Event) error {
 func (t *templateEvent) Updated(ctx context.Context, event cqrs.Event) error {
 	ctx, span := t.tracer.Start(ctx, "app.template.event.updated", trace.WithAttributes(
 		attribute.String("operation", "UPDATED"),
-		attribute.String("payload", fmt.Sprintf("%v", event.(UpdatedEvent))),
+		attribute.String("payload", fmt.Sprintf("%v", event.(template.DefaultEvent))),
 	))
 	defer span.End()
 
 	traceId := trace.SpanContextFromContext(ctx).TraceID().String()
-	if err := t.update.Handle(ctx, event.(UpdatedEvent)); err != nil {
+	if err := t.update.Handle(ctx, event.(template.DefaultEvent)); err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
 		t.log.Error("failed to process event",

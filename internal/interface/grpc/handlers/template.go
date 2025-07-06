@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/moriba-cloud/ose-postman/internal/app"
-	"github.com/moriba-cloud/ose-postman/internal/app/template"
+	"github.com/moriba-cloud/ose-postman/internal/domain/template"
 	templateDomain "github.com/moriba-cloud/ose-postman/internal/domain/template"
 	templatev1 "github.com/moriba-cloud/ose-postman/internal/interface/grpc/gen/go/template/v1"
 	"github.com/ose-micro/core/dto"
@@ -214,7 +214,7 @@ func (r *templateHandler) Delete(ctx context.Context, request *templatev1.Delete
 
 	traceId := trace.SpanContextFromContext(ctx).TraceID().String()
 	payload := template.DeleteCommand{
-		ID: request.Id,
+		Id: request.Id,
 	}
 
 	err := r.app.Delete(ctx, payload)

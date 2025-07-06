@@ -3,7 +3,6 @@ package template
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/moriba-cloud/ose-postman/internal/domain"
 	"github.com/moriba-cloud/ose-postman/internal/domain/template"
@@ -16,22 +15,6 @@ import (
 	"go.uber.org/zap"
 )
 
-type CreatedEvent struct {
-	Id           string    `json:"id"`
-	Content      string    `json:"content"`
-	Subject      string    `json:"subject"`
-	Placeholders []string  `json:"placeholders"`
-	CreatedAt    time.Time `json:"createdAt"`
-	UpdatedAt    time.Time `json:"updatedAt"`
-}
-
-// EventName implements cqrs.Event.
-func (c CreatedEvent) EventName() string {
-	return "template.created.event"
-}
-
-var _ cqrs.Event = &CreatedEvent{}
-
 type createdEvent struct {
 	repo   template.Repository
 	log    logger.Logger
@@ -39,7 +22,7 @@ type createdEvent struct {
 	bs     domain.Domain
 }
 
-func (c createdEvent) ToDomain(event CreatedEvent) (template.Domain, error) {
+func (c createdEvent) ToDomain(event template.DefaultEvent) (template.Domain, error) {
 	record, err := c.bs.Template.Existing(template.Params{
 		Id:           event.Id,
 		Content:      event.Content,
@@ -57,7 +40,7 @@ func (c createdEvent) ToDomain(event CreatedEvent) (template.Domain, error) {
 }
 
 // Handle implements cqrs.EventHandle.
-func (c *createdEvent) Handle(ctx context.Context, event CreatedEvent) error {
+func (c *createdEvent) Handle(ctx context.Context, event template.DefaultEvent) error {
 	ctx, span := c.tracer.Start(ctx, "app.template.created.event.handler", trace.WithAttributes(
 		attribute.String("operation", "CREATED"),
 		attribute.String("payload", fmt.Sprintf("%v", event)),
@@ -66,7 +49,6 @@ func (c *createdEvent) Handle(ctx context.Context, event CreatedEvent) error {
 
 	traceId := trace.SpanContextFromContext(ctx).TraceID().String()
 
-	// cast to domain
 	payload, err := c.ToDomain(event)
 	if err != nil {
 		span.RecordError(err)
@@ -102,7 +84,7 @@ func (c *createdEvent) Handle(ctx context.Context, event CreatedEvent) error {
 }
 
 func newCreatedEvent(bs domain.Domain, repo template.Repository, log logger.Logger,
-	tracer tracing.Tracer) cqrs.EventHandle[CreatedEvent] {
+	tracer tracing.Tracer) cqrs.EventHandle[template.DefaultEvent] {
 	return &createdEvent{
 		repo:   repo,
 		log:    log,

@@ -3,7 +3,6 @@ package template
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/moriba-cloud/ose-postman/internal/domain"
 	"github.com/moriba-cloud/ose-postman/internal/domain/template"
@@ -18,32 +17,6 @@ import (
 	"go.uber.org/zap"
 )
 
-type DeleteCommand struct {
-	ID string
-}
-
-// CommandName implements cqrs.Command.
-func (d DeleteCommand) CommandName() string {
-	return template.DELETED_COMMAND
-}
-
-// Validate implements cqrs.Command.
-func (d DeleteCommand) Validate() error {
-	fields := make([]string, 0)
-
-	if d.ID == "" {
-		fields = append(fields, "id is required")
-	}
-
-	if len(fields) > 0 {
-		return fmt.Errorf("%s", strings.Join(fields, ", "))
-	}
-
-	return nil
-}
-
-var _ cqrs.Command = DeleteCommand{}
-
 // Handler
 type deleteCommandHandler struct {
 	repo   template.Repository
@@ -54,7 +27,7 @@ type deleteCommandHandler struct {
 }
 
 // Handle implements cqrs.CommandHandle.
-func (d *deleteCommandHandler) Handle(ctx context.Context, command DeleteCommand) (template.Domain, error) {
+func (d *deleteCommandHandler) Handle(ctx context.Context, command template.DeleteCommand) (template.Domain, error) {
 	ctx, span := d.tracer.Start(ctx, "app.template.delete.command.handler", trace.WithAttributes(
 		attribute.String("operation", "DELETE"),
 		attribute.String("payload", fmt.Sprintf("%v", command)),
@@ -79,7 +52,7 @@ func (d *deleteCommandHandler) Handle(ctx context.Context, command DeleteCommand
 	record, err := d.repo.ReadOne(ctx, dto.Filter{
 		Field:    "id",
 		Operator: dto.EQUAL,
-		Value:    command.ID,
+		Value:    command.Id,
 	})
 	if err != nil {
 		span.RecordError(err)
@@ -108,7 +81,7 @@ func (d *deleteCommandHandler) Handle(ctx context.Context, command DeleteCommand
 	}
 
 	// publish bus
-	err = d.bus.Publish(command.CommandName(), DeletedEvent(record.MakePublic()))
+	err = d.bus.Publish(command.CommandName(), template.DefaultEvent(record.MakePublic()))
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
@@ -130,7 +103,7 @@ func (d *deleteCommandHandler) Handle(ctx context.Context, command DeleteCommand
 }
 
 func newDeleteCommandHandler(bs domain.Domain, repo template.Repository, log logger.Logger,
-	tracer tracing.Tracer, bus bus.Bus) cqrs.CommandHandle[DeleteCommand, template.Domain] {
+	tracer tracing.Tracer, bus bus.Bus) cqrs.CommandHandle[template.DeleteCommand, template.Domain] {
 	return &deleteCommandHandler{
 		repo:   repo,
 		log:    log,

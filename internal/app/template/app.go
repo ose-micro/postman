@@ -21,9 +21,9 @@ import (
 type templateApp struct {
 	tracer   tracing.Tracer
 	log      logger.Logger
-	create   cqrs.CommandHandle[CreateCommand, template.Domain]
-	update   cqrs.CommandHandle[UpdateCommand, template.Domain]
-	delete   cqrs.CommandHandle[DeleteCommand, template.Domain]
+	create   cqrs.CommandHandle[template.CreateCommand, template.Domain]
+	update   cqrs.CommandHandle[template.UpdateCommand, template.Domain]
+	delete   cqrs.CommandHandle[template.DeleteCommand, template.Domain]
 	read     cqrs.QueryHandle[ReadQuery, []template.Domain]
 	read_one cqrs.QueryHandle[ReadOneQuery, template.Domain]
 }
@@ -32,12 +32,12 @@ type templateApp struct {
 func (t *templateApp) Create(ctx context.Context, command cqrs.Command) (template.Domain, error) {
 	ctx, span := t.tracer.Start(ctx, "app.template.create.command", trace.WithAttributes(
 		attribute.String("operation", "CREATE"),
-		attribute.String("payload", fmt.Sprintf("%v", command.(CreateCommand))),
+		attribute.String("payload", fmt.Sprintf("%v", command.(template.CreateCommand))),
 	))
 	defer span.End()
 
 	traceId := trace.SpanContextFromContext(ctx).TraceID().String()
-	record, err := t.create.Handle(ctx, command.(CreateCommand))
+	record, err := t.create.Handle(ctx, command.(template.CreateCommand))
 
 	if err != nil {
 		span.RecordError(err)
@@ -58,12 +58,12 @@ func (t *templateApp) Create(ctx context.Context, command cqrs.Command) (templat
 func (t *templateApp) Delete(ctx context.Context, command cqrs.Command) error {
 	ctx, span := t.tracer.Start(ctx, "app.template.delete.command", trace.WithAttributes(
 		attribute.String("operation", "DELETE"),
-		attribute.String("payload", fmt.Sprintf("%v", command.(CreateCommand))),
+		attribute.String("payload", fmt.Sprintf("%v", command.(template.CreateCommand))),
 	))
 	defer span.End()
 
 	traceId := trace.SpanContextFromContext(ctx).TraceID().String()
-	if _, err := t.delete.Handle(ctx, command.(DeleteCommand)); err != nil {
+	if _, err := t.delete.Handle(ctx, command.(template.DeleteCommand)); err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
 		t.log.Error("failed to process command",
@@ -136,14 +136,14 @@ func (t *templateApp) ReadOne(ctx context.Context, filters ...dto.Filter) (templ
 
 // Update implements template.App.
 func (t *templateApp) Update(ctx context.Context, command cqrs.Command) error {
-	ctx, span := t.tracer.Start(ctx, "app.template.create.command", trace.WithAttributes(
-		attribute.String("operation", "CREATE"),
-		attribute.String("payload", fmt.Sprintf("%v", command.(CreateCommand))),
+	ctx, span := t.tracer.Start(ctx, "app.template.update.command", trace.WithAttributes(
+		attribute.String("operation", "UPDATE"),
+		attribute.String("payload", fmt.Sprintf("%v", command.(template.UpdateCommand))),
 	))
 	defer span.End()
 
 	traceId := trace.SpanContextFromContext(ctx).TraceID().String()
-	if _, err := t.create.Handle(ctx, command.(CreateCommand)); err != nil {
+	if _, err := t.create.Handle(ctx, command.(template.CreateCommand)); err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
 		t.log.Error("failed to process command",
