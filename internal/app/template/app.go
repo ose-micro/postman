@@ -143,12 +143,12 @@ func (t *templateApp) Update(ctx context.Context, command cqrs.Command) error {
 	defer span.End()
 
 	traceId := trace.SpanContextFromContext(ctx).TraceID().String()
-	if _, err := t.create.Handle(ctx, command.(template.CreateCommand)); err != nil {
+	if _, err := t.update.Handle(ctx, command.(template.UpdateCommand)); err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
 		t.log.Error("failed to process command",
 			zap.String("trace_id", traceId),
-			zap.String("operation", "CREATE"),
+			zap.String("operation", "UPDATE"),
 			zap.Error(err),
 		)
 

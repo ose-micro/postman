@@ -12,31 +12,36 @@
     }
   },
   "bus": {
-    "address": ""
+    "address": "nats://localhost:4222"
+  },
+  "redis": {
+    "address": "localhost:6379",
+    "password": "bcRqCvuAwPsbvriGXrIgSOdiuYbiGUyW",
+    "db": 1
   },
   "grpc": {
-    "port": 0
+    "port": 20241
   },
   "postgres": {
-    "host": "",
-    "port": 0,
-    "user": "",
-    "database": "",
-    "password": "",
+    "host": "gondola.proxy.rlwy.net",
+    "port": 37733,
+    "user": "postgres",
+    "database": "railway",
+    "password": "mBndQLSybGsEqcLnqiARqjIdxqjVBhlf",
     "sslMode": false
+  },
+  "mongo": {
+    "host": "switchyard.proxy.rlwy.net",
+    "port": 19563,
+    "timeout": "3s",
+    "user": "mongo",
+    "password": "dbNktHlhhwNGlpHbGtzuXzgjaONafmce",
+    "database": "notification"
   },
   "mailer": {
     "host": "",
     "username": "",
     "password": "",
     "port": 0
-  },
-  "mongo": {
-    "host": "",
-    "port": 0,
-    "timeout": "3s",
-    "user": "",
-    "password": "",
-    "database": ""
   }
 }
