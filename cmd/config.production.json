@@ -12,7 +12,7 @@
     }
   },
   "bus": {
-    "address": ""
+    "url": ""
   },
   "grpc": {
     "port": 0

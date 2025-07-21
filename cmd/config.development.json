@@ -12,7 +12,7 @@
     }
   },
   "bus": {
-    "address": "nats://localhost:4222"
+    "url": "nats://localhost:4222"
   },
   "redis": {
     "address": "localhost:6379",
