@@ -29,18 +29,18 @@ type Domain struct {
 }
 
 type Public struct {
-	Id        string            `json:"id"`
-	Recipient string            `json:"recipient"`
-	Sender    string           `json:"sender"`
-	Subject   string            `json:"subject"`
-	Count     int32               `json:"count"`
+	Id        string                 `json:"_id"`
+	Recipient string                 `json:"recipient"`
+	Sender    string                 `json:"sender"`
+	Subject   string                 `json:"subject"`
+	Count     int32                  `json:"count"`
 	Data      map[string]interface{} `json:"data"`
-	Template  string            `json:"template"`
-	From      string            `json:"from"`
-	Message   string            `json:"message"`
-	State     State             `json:"status"`
-	CreatedAt time.Time         `json:"createdAt"`
-	UpdatedAt time.Time         `json:"updatedAt"`
+	Template  string                 `json:"template"`
+	From      string                 `json:"from"`
+	Message   string                 `json:"message"`
+	State     State                  `json:"status"`
+	CreatedAt time.Time              `json:"created_at"`
+	UpdatedAt time.Time              `json:"updated_at"`
 }
 
 type Params struct {

@@ -7,7 +7,7 @@ import (
 )
 
 type DomainEvent struct {
-	Id        string                 `json:"id"`
+	Id        string                 `json:"_id"`
 	Recipient string                 `json:"recipient"`
 	Sender    string                 `json:"sender"`
 	Subject   string                 `json:"subject"`
@@ -17,8 +17,8 @@ type DomainEvent struct {
 	From      string                 `json:"from"`
 	Message   string                 `json:"message"`
 	State     State                  `json:"status"`
-	CreatedAt time.Time              `json:"createdAt"`
-	UpdatedAt time.Time              `json:"updatedAt"`
+	CreatedAt time.Time              `json:"created_at"`
+	UpdatedAt time.Time              `json:"updated_at"`
 }
 
 // EventName implements cqrs.Event.

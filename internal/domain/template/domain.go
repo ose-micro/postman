@@ -20,10 +20,10 @@ type Public struct {
 	Id           string    `json:"id"`
 	Content      string    `json:"content"`
 	Subject      string    `json:"subject"`
-	Count        int32       `json:"count"`
+	Count        int32     `json:"count"`
 	Placeholders []string  `json:"placeholders"`
-	CreatedAt    time.Time `json:"createdAt"`
-	UpdatedAt    time.Time `json:"updatedAt"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
 }
 
 type Params struct {
@@ -80,7 +80,7 @@ func (d *Domain) MakePublic() Public {
 		Content:      d.content,
 		Subject:      d.subject,
 		Placeholders: d.placeholders,
-		CreatedAt: d.createdAt,
-		UpdatedAt: d.updatedAt,
+		CreatedAt:    d.createdAt,
+		UpdatedAt:    d.updatedAt,
 	}
 }

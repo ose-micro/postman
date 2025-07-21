@@ -160,9 +160,8 @@ func (c *createCommandHandler) Handle(ctx context.Context, command email.CreateC
 		return email.Domain{}, err
 	}
 
-	public := record.MakePublic()
 	// publish bus
-	err = c.bus.Publish(command.CommandName(), email.DomainEvent(public))
+	err = c.bus.Publish(command.CommandName(), email.DomainEvent(record.MakePublic()))
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())

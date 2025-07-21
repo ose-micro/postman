@@ -7,13 +7,13 @@ import (
 )
 
 type DomainEvent struct {
-	Id           string    `json:"id"`
+	Id           string    `json:"_id"`
 	Content      string    `json:"content"`
 	Subject      string    `json:"subject"`
-	Count        int32       `json:"count"`
+	Count        int32     `json:"count"`
 	Placeholders []string  `json:"placeholders"`
-	CreatedAt    time.Time `json:"createdAt"`
-	UpdatedAt    time.Time `json:"updatedAt"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
 }
 
 // EventName implements cqrs.Event.

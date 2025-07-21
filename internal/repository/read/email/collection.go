@@ -9,7 +9,7 @@ import (
 type Email struct {
 	Id        string                 `bson:"_id"`
 	Recipient string                 `bson:"recipient,omitempty"`
-	Sender    string                `bson:"sender,omitempty"`
+	Sender    string                 `bson:"sender,omitempty"`
 	Subject   string                 `bson:"subject,omitempty"`
 	Data      map[string]interface{} `bson:"data,omitempty"`
 	Template  string                 `bson:"template,omitempty"`
