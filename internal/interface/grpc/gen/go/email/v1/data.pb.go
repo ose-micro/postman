@@ -76,15 +76,16 @@ type Email struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	Recipient     string                 `protobuf:"bytes,2,opt,name=recipient,proto3" json:"recipient,omitempty"`
-	Data          []*v1.Field            `protobuf:"bytes,3,rep,name=data,proto3" json:"data,omitempty"`
+	Data          map[string]string      `protobuf:"bytes,3,rep,name=data,proto3" json:"data,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	Subject       string                 `protobuf:"bytes,4,opt,name=subject,proto3" json:"subject,omitempty"`
 	Sender        string                 `protobuf:"bytes,5,opt,name=sender,proto3" json:"sender,omitempty"`
 	From          string                 `protobuf:"bytes,6,opt,name=from,proto3" json:"from,omitempty"`
 	Template      string                 `protobuf:"bytes,7,opt,name=template,proto3" json:"template,omitempty"`
 	Message       string                 `protobuf:"bytes,8,opt,name=message,proto3" json:"message,omitempty"`
 	State         State                  `protobuf:"varint,9,opt,name=state,proto3,enum=email.v1.State" json:"state,omitempty"`
-	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,11,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	Count         int32                  `protobuf:"varint,10,opt,name=count,proto3" json:"count,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,11,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,12,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -133,7 +134,7 @@ func (x *Email) GetRecipient() string {
 	return ""
 }
 
-func (x *Email) GetData() []*v1.Field {
+func (x *Email) GetData() map[string]string {
 	if x != nil {
 		return x.Data
 	}
@@ -182,6 +183,13 @@ func (x *Email) GetState() State {
 	return State_StateUnknown
 }
 
+func (x *Email) GetCount() int32 {
+	if x != nil {
+		return x.Count
+	}
+	return 0
+}
+
 func (x *Email) GetCreatedAt() *timestamppb.Timestamp {
 	if x != nil {
 		return x.CreatedAt
@@ -199,7 +207,7 @@ func (x *Email) GetUpdatedAt() *timestamppb.Timestamp {
 type CreateRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Recipient     string                 `protobuf:"bytes,1,opt,name=recipient,proto3" json:"recipient,omitempty"`
-	Data          []*v1.Field            `protobuf:"bytes,2,rep,name=data,proto3" json:"data,omitempty"`
+	Data          map[string]string      `protobuf:"bytes,2,rep,name=data,proto3" json:"data,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	Sender        string                 `protobuf:"bytes,3,opt,name=sender,proto3" json:"sender,omitempty"`
 	Template      string                 `protobuf:"bytes,4,opt,name=template,proto3" json:"template,omitempty"`
 	From          string                 `protobuf:"bytes,5,opt,name=from,proto3" json:"from,omitempty"`
@@ -244,7 +252,7 @@ func (x *CreateRequest) GetRecipient() string {
 	return ""
 }
 
-func (x *CreateRequest) GetData() []*v1.Field {
+func (x *CreateRequest) GetData() map[string]string {
 	if x != nil {
 		return x.Data
 	}
@@ -412,27 +420,27 @@ func (x *ResendResponse) GetMessage() string {
 	return ""
 }
 
-type ReadOneRequest struct {
+type Emails struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Filter        []*v1.Filter           `protobuf:"bytes,1,rep,name=filter,proto3" json:"filter,omitempty"`
+	Data          []*Email               `protobuf:"bytes,1,rep,name=data,proto3" json:"data,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ReadOneRequest) Reset() {
-	*x = ReadOneRequest{}
+func (x *Emails) Reset() {
+	*x = Emails{}
 	mi := &file_email_v1_data_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ReadOneRequest) String() string {
+func (x *Emails) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ReadOneRequest) ProtoMessage() {}
+func (*Emails) ProtoMessage() {}
 
-func (x *ReadOneRequest) ProtoReflect() protoreflect.Message {
+func (x *Emails) ProtoReflect() protoreflect.Message {
 	mi := &file_email_v1_data_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -444,66 +452,14 @@ func (x *ReadOneRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ReadOneRequest.ProtoReflect.Descriptor instead.
-func (*ReadOneRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use Emails.ProtoReflect.Descriptor instead.
+func (*Emails) Descriptor() ([]byte, []int) {
 	return file_email_v1_data_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *ReadOneRequest) GetFilter() []*v1.Filter {
+func (x *Emails) GetData() []*Email {
 	if x != nil {
-		return x.Filter
-	}
-	return nil
-}
-
-type ReadOneResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
-	Record        *Email                 `protobuf:"bytes,2,opt,name=record,proto3" json:"record,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ReadOneResponse) Reset() {
-	*x = ReadOneResponse{}
-	mi := &file_email_v1_data_proto_msgTypes[6]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ReadOneResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ReadOneResponse) ProtoMessage() {}
-
-func (x *ReadOneResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_email_v1_data_proto_msgTypes[6]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ReadOneResponse.ProtoReflect.Descriptor instead.
-func (*ReadOneResponse) Descriptor() ([]byte, []int) {
-	return file_email_v1_data_proto_rawDescGZIP(), []int{6}
-}
-
-func (x *ReadOneResponse) GetMessage() string {
-	if x != nil {
-		return x.Message
-	}
-	return ""
-}
-
-func (x *ReadOneResponse) GetRecord() *Email {
-	if x != nil {
-		return x.Record
+		return x.Data
 	}
 	return nil
 }
@@ -517,7 +473,7 @@ type ReadRequest struct {
 
 func (x *ReadRequest) Reset() {
 	*x = ReadRequest{}
-	mi := &file_email_v1_data_proto_msgTypes[7]
+	mi := &file_email_v1_data_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -529,7 +485,7 @@ func (x *ReadRequest) String() string {
 func (*ReadRequest) ProtoMessage() {}
 
 func (x *ReadRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_email_v1_data_proto_msgTypes[7]
+	mi := &file_email_v1_data_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -542,7 +498,7 @@ func (x *ReadRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReadRequest.ProtoReflect.Descriptor instead.
 func (*ReadRequest) Descriptor() ([]byte, []int) {
-	return file_email_v1_data_proto_rawDescGZIP(), []int{7}
+	return file_email_v1_data_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *ReadRequest) GetRequest() *v1.Request {
@@ -554,16 +510,14 @@ func (x *ReadRequest) GetRequest() *v1.Request {
 
 type ReadResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Request       *v1.Request            `protobuf:"bytes,1,opt,name=request,proto3" json:"request,omitempty"`
-	Size          int64                  `protobuf:"varint,2,opt,name=size,proto3" json:"size,omitempty"`
-	Records       []*Email               `protobuf:"bytes,3,rep,name=records,proto3" json:"records,omitempty"`
+	Result        map[string]*Emails     `protobuf:"bytes,1,rep,name=result,proto3" json:"result,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ReadResponse) Reset() {
 	*x = ReadResponse{}
-	mi := &file_email_v1_data_proto_msgTypes[8]
+	mi := &file_email_v1_data_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -575,7 +529,7 @@ func (x *ReadResponse) String() string {
 func (*ReadResponse) ProtoMessage() {}
 
 func (x *ReadResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_email_v1_data_proto_msgTypes[8]
+	mi := &file_email_v1_data_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -588,26 +542,12 @@ func (x *ReadResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReadResponse.ProtoReflect.Descriptor instead.
 func (*ReadResponse) Descriptor() ([]byte, []int) {
-	return file_email_v1_data_proto_rawDescGZIP(), []int{8}
+	return file_email_v1_data_proto_rawDescGZIP(), []int{7}
 }
 
-func (x *ReadResponse) GetRequest() *v1.Request {
+func (x *ReadResponse) GetResult() map[string]*Emails {
 	if x != nil {
-		return x.Request
-	}
-	return nil
-}
-
-func (x *ReadResponse) GetSize() int64 {
-	if x != nil {
-		return x.Size
-	}
-	return 0
-}
-
-func (x *ReadResponse) GetRecords() []*Email {
-	if x != nil {
-		return x.Records
+		return x.Result
 	}
 	return nil
 }
@@ -621,7 +561,7 @@ type DeleteRequest struct {
 
 func (x *DeleteRequest) Reset() {
 	*x = DeleteRequest{}
-	mi := &file_email_v1_data_proto_msgTypes[9]
+	mi := &file_email_v1_data_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -633,7 +573,7 @@ func (x *DeleteRequest) String() string {
 func (*DeleteRequest) ProtoMessage() {}
 
 func (x *DeleteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_email_v1_data_proto_msgTypes[9]
+	mi := &file_email_v1_data_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -646,7 +586,7 @@ func (x *DeleteRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteRequest.ProtoReflect.Descriptor instead.
 func (*DeleteRequest) Descriptor() ([]byte, []int) {
-	return file_email_v1_data_proto_rawDescGZIP(), []int{9}
+	return file_email_v1_data_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *DeleteRequest) GetId() string {
@@ -666,7 +606,7 @@ type DeleteResponse struct {
 
 func (x *DeleteResponse) Reset() {
 	*x = DeleteResponse{}
-	mi := &file_email_v1_data_proto_msgTypes[10]
+	mi := &file_email_v1_data_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -678,7 +618,7 @@ func (x *DeleteResponse) String() string {
 func (*DeleteResponse) ProtoMessage() {}
 
 func (x *DeleteResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_email_v1_data_proto_msgTypes[10]
+	mi := &file_email_v1_data_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -691,7 +631,7 @@ func (x *DeleteResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteResponse.ProtoReflect.Descriptor instead.
 func (*DeleteResponse) Descriptor() ([]byte, []int) {
-	return file_email_v1_data_proto_rawDescGZIP(), []int{10}
+	return file_email_v1_data_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *DeleteResponse) GetMessage() string {
@@ -712,46 +652,51 @@ var File_email_v1_data_proto protoreflect.FileDescriptor
 
 const file_email_v1_data_proto_rawDesc = "" +
 	"\n" +
-	"\x13email/v1/data.proto\x12\bemail.v1\x1a\x16common/v1/common.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xf4\x02\n" +
+	"\x13email/v1/data.proto\x12\bemail.v1\x1a\x16common/v1/common.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xcc\x03\n" +
 	"\x05Email\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1c\n" +
-	"\trecipient\x18\x02 \x01(\tR\trecipient\x12$\n" +
-	"\x04data\x18\x03 \x03(\v2\x10.common.v1.FieldR\x04data\x12\x18\n" +
+	"\trecipient\x18\x02 \x01(\tR\trecipient\x12-\n" +
+	"\x04data\x18\x03 \x03(\v2\x19.email.v1.Email.DataEntryR\x04data\x12\x18\n" +
 	"\asubject\x18\x04 \x01(\tR\asubject\x12\x16\n" +
 	"\x06sender\x18\x05 \x01(\tR\x06sender\x12\x12\n" +
 	"\x04from\x18\x06 \x01(\tR\x04from\x12\x1a\n" +
 	"\btemplate\x18\a \x01(\tR\btemplate\x12\x18\n" +
 	"\amessage\x18\b \x01(\tR\amessage\x12%\n" +
-	"\x05state\x18\t \x01(\x0e2\x0f.email.v1.StateR\x05state\x129\n" +
+	"\x05state\x18\t \x01(\x0e2\x0f.email.v1.StateR\x05state\x12\x14\n" +
+	"\x05count\x18\n" +
+	" \x01(\x05R\x05count\x129\n" +
 	"\n" +
-	"created_at\x18\n" +
-	" \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"created_at\x18\v \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\v \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\x9b\x01\n" +
+	"updated_at\x18\f \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x1a7\n" +
+	"\tDataEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xe5\x01\n" +
 	"\rCreateRequest\x12\x1c\n" +
-	"\trecipient\x18\x01 \x01(\tR\trecipient\x12$\n" +
-	"\x04data\x18\x02 \x03(\v2\x10.common.v1.FieldR\x04data\x12\x16\n" +
+	"\trecipient\x18\x01 \x01(\tR\trecipient\x125\n" +
+	"\x04data\x18\x02 \x03(\v2!.email.v1.CreateRequest.DataEntryR\x04data\x12\x16\n" +
 	"\x06sender\x18\x03 \x01(\tR\x06sender\x12\x1a\n" +
 	"\btemplate\x18\x04 \x01(\tR\btemplate\x12\x12\n" +
-	"\x04from\x18\x05 \x01(\tR\x04from\"S\n" +
+	"\x04from\x18\x05 \x01(\tR\x04from\x1a7\n" +
+	"\tDataEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"S\n" +
 	"\x0eCreateResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\x12'\n" +
 	"\x06record\x18\x02 \x01(\v2\x0f.email.v1.EmailR\x06record\"\x1f\n" +
 	"\rResendRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"*\n" +
 	"\x0eResendResponse\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessage\";\n" +
-	"\x0eReadOneRequest\x12)\n" +
-	"\x06filter\x18\x01 \x03(\v2\x11.common.v1.FilterR\x06filter\"T\n" +
-	"\x0fReadOneResponse\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessage\x12'\n" +
-	"\x06record\x18\x02 \x01(\v2\x0f.email.v1.EmailR\x06record\";\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"-\n" +
+	"\x06Emails\x12#\n" +
+	"\x04data\x18\x01 \x03(\v2\x0f.email.v1.EmailR\x04data\";\n" +
 	"\vReadRequest\x12,\n" +
-	"\arequest\x18\x01 \x01(\v2\x12.common.v1.RequestR\arequest\"{\n" +
-	"\fReadResponse\x12,\n" +
-	"\arequest\x18\x01 \x01(\v2\x12.common.v1.RequestR\arequest\x12\x12\n" +
-	"\x04size\x18\x02 \x01(\x03R\x04size\x12)\n" +
-	"\arecords\x18\x03 \x03(\v2\x0f.email.v1.EmailR\arecords\"\x1f\n" +
+	"\arequest\x18\x01 \x01(\v2\x12.common.v1.RequestR\arequest\"\x97\x01\n" +
+	"\fReadResponse\x12:\n" +
+	"\x06result\x18\x01 \x03(\v2\".email.v1.ReadResponse.ResultEntryR\x06result\x1aK\n" +
+	"\vResultEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12&\n" +
+	"\x05value\x18\x02 \x01(\v2\x10.email.v1.EmailsR\x05value:\x028\x01\"\x1f\n" +
 	"\rDeleteRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"S\n" +
 	"\x0eDeleteResponse\x12\x18\n" +
@@ -776,7 +721,7 @@ func file_email_v1_data_proto_rawDescGZIP() []byte {
 }
 
 var file_email_v1_data_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_email_v1_data_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_email_v1_data_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
 var file_email_v1_data_proto_goTypes = []any{
 	(State)(0),                    // 0: email.v1.State
 	(*Email)(nil),                 // 1: email.v1.Email
@@ -784,35 +729,34 @@ var file_email_v1_data_proto_goTypes = []any{
 	(*CreateResponse)(nil),        // 3: email.v1.CreateResponse
 	(*ResendRequest)(nil),         // 4: email.v1.ResendRequest
 	(*ResendResponse)(nil),        // 5: email.v1.ResendResponse
-	(*ReadOneRequest)(nil),        // 6: email.v1.ReadOneRequest
-	(*ReadOneResponse)(nil),       // 7: email.v1.ReadOneResponse
-	(*ReadRequest)(nil),           // 8: email.v1.ReadRequest
-	(*ReadResponse)(nil),          // 9: email.v1.ReadResponse
-	(*DeleteRequest)(nil),         // 10: email.v1.DeleteRequest
-	(*DeleteResponse)(nil),        // 11: email.v1.DeleteResponse
-	(*v1.Field)(nil),              // 12: common.v1.Field
-	(*timestamppb.Timestamp)(nil), // 13: google.protobuf.Timestamp
-	(*v1.Filter)(nil),             // 14: common.v1.Filter
+	(*Emails)(nil),                // 6: email.v1.Emails
+	(*ReadRequest)(nil),           // 7: email.v1.ReadRequest
+	(*ReadResponse)(nil),          // 8: email.v1.ReadResponse
+	(*DeleteRequest)(nil),         // 9: email.v1.DeleteRequest
+	(*DeleteResponse)(nil),        // 10: email.v1.DeleteResponse
+	nil,                           // 11: email.v1.Email.DataEntry
+	nil,                           // 12: email.v1.CreateRequest.DataEntry
+	nil,                           // 13: email.v1.ReadResponse.ResultEntry
+	(*timestamppb.Timestamp)(nil), // 14: google.protobuf.Timestamp
 	(*v1.Request)(nil),            // 15: common.v1.Request
 }
 var file_email_v1_data_proto_depIdxs = []int32{
-	12, // 0: email.v1.Email.data:type_name -> common.v1.Field
+	11, // 0: email.v1.Email.data:type_name -> email.v1.Email.DataEntry
 	0,  // 1: email.v1.Email.state:type_name -> email.v1.State
-	13, // 2: email.v1.Email.created_at:type_name -> google.protobuf.Timestamp
-	13, // 3: email.v1.Email.updated_at:type_name -> google.protobuf.Timestamp
-	12, // 4: email.v1.CreateRequest.data:type_name -> common.v1.Field
+	14, // 2: email.v1.Email.created_at:type_name -> google.protobuf.Timestamp
+	14, // 3: email.v1.Email.updated_at:type_name -> google.protobuf.Timestamp
+	12, // 4: email.v1.CreateRequest.data:type_name -> email.v1.CreateRequest.DataEntry
 	1,  // 5: email.v1.CreateResponse.record:type_name -> email.v1.Email
-	14, // 6: email.v1.ReadOneRequest.filter:type_name -> common.v1.Filter
-	1,  // 7: email.v1.ReadOneResponse.record:type_name -> email.v1.Email
-	15, // 8: email.v1.ReadRequest.request:type_name -> common.v1.Request
-	15, // 9: email.v1.ReadResponse.request:type_name -> common.v1.Request
-	1,  // 10: email.v1.ReadResponse.records:type_name -> email.v1.Email
-	1,  // 11: email.v1.DeleteResponse.record:type_name -> email.v1.Email
-	12, // [12:12] is the sub-list for method output_type
-	12, // [12:12] is the sub-list for method input_type
-	12, // [12:12] is the sub-list for extension type_name
-	12, // [12:12] is the sub-list for extension extendee
-	0,  // [0:12] is the sub-list for field type_name
+	1,  // 6: email.v1.Emails.data:type_name -> email.v1.Email
+	15, // 7: email.v1.ReadRequest.request:type_name -> common.v1.Request
+	13, // 8: email.v1.ReadResponse.result:type_name -> email.v1.ReadResponse.ResultEntry
+	1,  // 9: email.v1.DeleteResponse.record:type_name -> email.v1.Email
+	6,  // 10: email.v1.ReadResponse.ResultEntry.value:type_name -> email.v1.Emails
+	11, // [11:11] is the sub-list for method output_type
+	11, // [11:11] is the sub-list for method input_type
+	11, // [11:11] is the sub-list for extension type_name
+	11, // [11:11] is the sub-list for extension extendee
+	0,  // [0:11] is the sub-list for field type_name
 }
 
 func init() { file_email_v1_data_proto_init() }
@@ -826,7 +770,7 @@ func file_email_v1_data_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_email_v1_data_proto_rawDesc), len(file_email_v1_data_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   11,
+			NumMessages:   13,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

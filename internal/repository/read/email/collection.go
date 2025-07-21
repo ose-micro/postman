@@ -7,17 +7,17 @@ import (
 )
 
 type Email struct {
-	Id        string      `bson:"_id"`
-	Recipient string      `bson:"recipient,omitempty"`
-	Sender    *string      `bson:"sender,omitempty"`
-	Subject   string      `bson:"subject,omitempty"`
-	Data      any         `bson:"data,omitempty"`
-	Template  string      `bson:"template,omitempty"`
-	From      string      `bson:"from,omitempty"`
-	Message   string      `bson:"message,omitempty"`
-	State     email.State `bson:"state,omitempty"`
-	CreatedAt time.Time   `bson:"created_at"`
-	UpdatedAt time.Time   `bson:"updated_at"`
+	Id        string                 `bson:"_id"`
+	Recipient string                 `bson:"recipient,omitempty"`
+	Sender    string                `bson:"sender,omitempty"`
+	Subject   string                 `bson:"subject,omitempty"`
+	Data      map[string]interface{} `bson:"data,omitempty"`
+	Template  string                 `bson:"template,omitempty"`
+	From      string                 `bson:"from,omitempty"`
+	Message   string                 `bson:"message,omitempty"`
+	State     email.State            `bson:"state,omitempty"`
+	CreatedAt time.Time              `bson:"created_at"`
+	UpdatedAt time.Time              `bson:"updated_at"`
 }
 
 func newCollection(params email.Domain) Email {

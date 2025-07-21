@@ -24,40 +24,35 @@ var File_email_v1_service_proto protoreflect.FileDescriptor
 
 const file_email_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x16email/v1/service.proto\x12\bemail.v1\x1a\x13email/v1/data.proto2\xbc\x02\n" +
+	"\x16email/v1/service.proto\x12\bemail.v1\x1a\x13email/v1/data.proto2\xfc\x01\n" +
 	"\fEmailService\x12;\n" +
 	"\x06Create\x12\x17.email.v1.CreateRequest\x1a\x18.email.v1.CreateResponse\x125\n" +
-	"\x04Read\x12\x15.email.v1.ReadRequest\x1a\x16.email.v1.ReadResponse\x12>\n" +
-	"\aReadOne\x12\x18.email.v1.ReadOneRequest\x1a\x19.email.v1.ReadOneResponse\x12;\n" +
+	"\x04Read\x12\x15.email.v1.ReadRequest\x1a\x16.email.v1.ReadResponse\x12;\n" +
 	"\x06Resend\x12\x17.email.v1.ResendRequest\x1a\x18.email.v1.ResendResponse\x12;\n" +
 	"\x06Delete\x12\x17.email.v1.DeleteRequest\x1a\x18.email.v1.DeleteResponseB\xb2\x01\n" +
 	"\fcom.email.v1B\fServiceProtoP\x01ZSgithub.com/moriba-cloud/ose-postman/internal/interface/grpc/gen/go/email/v1;emailv1\xa2\x02\x03EXX\xaa\x02\bEmail.V1\xca\x02\bEmail\\V1\xe2\x02\x14Email\\V1\\GPBMetadata\xea\x02\tEmail::V1b\x06proto3"
 
 var file_email_v1_service_proto_goTypes = []any{
-	(*CreateRequest)(nil),   // 0: email.v1.CreateRequest
-	(*ReadRequest)(nil),     // 1: email.v1.ReadRequest
-	(*ReadOneRequest)(nil),  // 2: email.v1.ReadOneRequest
-	(*ResendRequest)(nil),   // 3: email.v1.ResendRequest
-	(*DeleteRequest)(nil),   // 4: email.v1.DeleteRequest
-	(*CreateResponse)(nil),  // 5: email.v1.CreateResponse
-	(*ReadResponse)(nil),    // 6: email.v1.ReadResponse
-	(*ReadOneResponse)(nil), // 7: email.v1.ReadOneResponse
-	(*ResendResponse)(nil),  // 8: email.v1.ResendResponse
-	(*DeleteResponse)(nil),  // 9: email.v1.DeleteResponse
+	(*CreateRequest)(nil),  // 0: email.v1.CreateRequest
+	(*ReadRequest)(nil),    // 1: email.v1.ReadRequest
+	(*ResendRequest)(nil),  // 2: email.v1.ResendRequest
+	(*DeleteRequest)(nil),  // 3: email.v1.DeleteRequest
+	(*CreateResponse)(nil), // 4: email.v1.CreateResponse
+	(*ReadResponse)(nil),   // 5: email.v1.ReadResponse
+	(*ResendResponse)(nil), // 6: email.v1.ResendResponse
+	(*DeleteResponse)(nil), // 7: email.v1.DeleteResponse
 }
 var file_email_v1_service_proto_depIdxs = []int32{
 	0, // 0: email.v1.EmailService.Create:input_type -> email.v1.CreateRequest
 	1, // 1: email.v1.EmailService.Read:input_type -> email.v1.ReadRequest
-	2, // 2: email.v1.EmailService.ReadOne:input_type -> email.v1.ReadOneRequest
-	3, // 3: email.v1.EmailService.Resend:input_type -> email.v1.ResendRequest
-	4, // 4: email.v1.EmailService.Delete:input_type -> email.v1.DeleteRequest
-	5, // 5: email.v1.EmailService.Create:output_type -> email.v1.CreateResponse
-	6, // 6: email.v1.EmailService.Read:output_type -> email.v1.ReadResponse
-	7, // 7: email.v1.EmailService.ReadOne:output_type -> email.v1.ReadOneResponse
-	8, // 8: email.v1.EmailService.Resend:output_type -> email.v1.ResendResponse
-	9, // 9: email.v1.EmailService.Delete:output_type -> email.v1.DeleteResponse
-	5, // [5:10] is the sub-list for method output_type
-	0, // [0:5] is the sub-list for method input_type
+	2, // 2: email.v1.EmailService.Resend:input_type -> email.v1.ResendRequest
+	3, // 3: email.v1.EmailService.Delete:input_type -> email.v1.DeleteRequest
+	4, // 4: email.v1.EmailService.Create:output_type -> email.v1.CreateResponse
+	5, // 5: email.v1.EmailService.Read:output_type -> email.v1.ReadResponse
+	6, // 6: email.v1.EmailService.Resend:output_type -> email.v1.ResendResponse
+	7, // 7: email.v1.EmailService.Delete:output_type -> email.v1.DeleteResponse
+	4, // [4:8] is the sub-list for method output_type
+	0, // [0:4] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name

@@ -3,8 +3,9 @@ package main
 import (
 	"github.com/moriba-cloud/ose-postman/internal/app"
 	"github.com/moriba-cloud/ose-postman/internal/domain"
+	"github.com/moriba-cloud/ose-postman/internal/events"
 	"github.com/moriba-cloud/ose-postman/internal/interface/grpc"
-	"github.com/moriba-cloud/ose-postman/internal/interface/nats"
+	consumer "github.com/moriba-cloud/ose-postman/internal/interface/nats"
 	"github.com/moriba-cloud/ose-postman/internal/repository/read"
 	"github.com/moriba-cloud/ose-postman/internal/repository/write"
 	ose "github.com/ose-micro/core"
@@ -12,7 +13,7 @@ import (
 	"github.com/ose-micro/core/logger"
 	"github.com/ose-micro/core/timestamp"
 	"github.com/ose-micro/core/tracing"
-	"github.com/ose-micro/cqrs/bus"
+	"github.com/ose-micro/cqrs/bus/nats"
 	"github.com/ose-micro/mailer"
 	mongodb "github.com/ose-micro/mongo"
 	"github.com/ose-micro/postgres"
@@ -26,16 +27,15 @@ func main() {
 			domain.InjectDomain,
 			postgres.New,
 			mongodb.New,
-			bus.New,
-			bus.NewNats,
 			mailer.New,
 			app.InjectApps,
-			app.InjectEvents,
+			nats.New,
+			events.Inject,
 			write.InjectRepository,
 			read.InjectRepository,
 		),
 		fx.Invoke(write.Migrate),
-		fx.Invoke(nats.InvokeConsumers),
+		fx.Invoke(consumer.InvokeConsumers),
 		fx.Invoke(grpc.RunGRPCServer),
 	)
 
@@ -43,9 +43,9 @@ func main() {
 }
 
 func loadConfig() (config.Service, logger.Config, tracing.Config, timestamp.Config,
-	*postgres.Config, mongodb.Config, bus.Config, grpc.Config, *mailer.Config, error) {
+	*postgres.Config, mongodb.Config, nats.Config, grpc.Config, *mailer.Config, error) {
 	var grpcConfig grpc.Config
-	var natsConf bus.Config
+	var natsConf nats.Config
 	var postgresConfig postgres.Config
 	var mongoConfig mongodb.Config
 	var mailerConfig mailer.Config
@@ -60,7 +60,7 @@ func loadConfig() (config.Service, logger.Config, tracing.Config, timestamp.Conf
 
 	if err != nil {
 		return config.Service{}, logger.Config{}, tracing.Config{}, timestamp.Config{},
-			nil, mongodb.Config{}, bus.Config{}, grpc.Config{}, nil, err
+			nil, mongodb.Config{}, nats.Config{}, grpc.Config{}, nil, err
 	}
 
 	return conf.Core.Service, conf.Core.Service.Logger, conf.Core.Service.Tracer, conf.Core.Service.Timestamp, 

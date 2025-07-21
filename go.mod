@@ -4,11 +4,12 @@ go 1.24.1
 
 require (
 	github.com/lib/pq v1.10.9
-	github.com/ose-micro/core v0.0.8
+	github.com/ose-micro/core v0.1.5
+	github.com/ose-micro/cqrs v0.2.3
 	github.com/ose-micro/grpc v0.0.4
 	github.com/ose-micro/mailer v0.0.2
-	github.com/ose-micro/mongo v0.0.7
-	github.com/ose-micro/postgres v0.1.0
+	github.com/ose-micro/mongo v0.2.0
+	github.com/ose-micro/postgres v0.1.2
 	go.mongodb.org/mongo-driver v1.17.4
 	go.opentelemetry.io/otel v1.36.0
 	go.opentelemetry.io/otel/trace v1.36.0
@@ -17,8 +18,6 @@ require (
 	google.golang.org/grpc v1.72.1
 	google.golang.org/protobuf v1.36.6
 )
-
-require github.com/nats-io/nats.go v1.43.0 // indirect
 
 require (
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
@@ -39,9 +38,9 @@ require (
 	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/montanaflynn/stats v0.7.1 // indirect
+	github.com/nats-io/nats.go v1.43.0 // indirect
 	github.com/nats-io/nkeys v0.4.11 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
-	github.com/ose-micro/cqrs v0.1.1
 	github.com/pelletier/go-toml/v2 v2.2.3 // indirect
 	github.com/sagikazarmark/locafero v0.7.0 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect

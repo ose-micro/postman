@@ -5,16 +5,16 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/moriba-cloud/ose-postman/internal/app/email"
-	domain_email "github.com/moriba-cloud/ose-postman/internal/domain/email"
+	"github.com/moriba-cloud/ose-postman/internal/domain/email"
 	"github.com/ose-micro/cqrs/bus"
 )
 
-func newEmailConsumer(handler domain_email.Event, bus bus.Bus) {
+func newEmailConsumer(handler email.Event, app email.App, bus bus.Bus) {
 	// Created Event
-	bus.Subscribe(domain_email.CREATED_COMMAND,
+	bus.Subscribe(email.CREATED_COMMAND,
+		email.QUEUE,
 		func(ctx context.Context, data any) error {
-			var event email.CreatedEvent
+			var event email.DomainEvent
 			raw, err := toByte(data)
 			if err != nil {
 				return err
@@ -27,9 +27,10 @@ func newEmailConsumer(handler domain_email.Event, bus bus.Bus) {
 		})
 
 	// Updated Event
-	bus.Subscribe(domain_email.UPDATED_COMMAND,
+	bus.Subscribe(email.UPDATED_COMMAND,
+		email.QUEUE,
 		func(ctx context.Context, data any) error {
-			var event email.UpdatedEvent
+			var event email.DomainEvent
 			raw, err := toByte(data)
 			if err != nil {
 				return err
@@ -41,25 +42,11 @@ func newEmailConsumer(handler domain_email.Event, bus bus.Bus) {
 			return handler.Updated(ctx, event)
 		})
 
-	// Delete Event
-	bus.Subscribe(domain_email.DELETED_COMMAND,
-		func(ctx context.Context, data any) error {
-			var event email.DeletedEvent
-			raw, err := toByte(data)
-			if err != nil {
-				return err
-			}
-
-			if err := json.Unmarshal(raw, &event); err != nil {
-				return fmt.Errorf("failed to unmarshal into DeletedEvent: %w", err)
-			}
-			return handler.Deleted(ctx, event)
-		})
-
 	// Send Event
-	bus.Subscribe(domain_email.SEND_MAIL_EVENT,
+	bus.Subscribe(email.SEND_MAIL_EVENT,
+		email.QUEUE,
 		func(ctx context.Context, data any) error {
-			var event email.SendMailEvent
+			var event email.SendCommand
 			raw, err := toByte(data)
 			if err != nil {
 				return err
@@ -68,6 +55,16 @@ func newEmailConsumer(handler domain_email.Event, bus bus.Bus) {
 			if err := json.Unmarshal(raw, &event); err != nil {
 				return fmt.Errorf("failed to unmarshal into SendMailEvent: %w", err)
 			}
-			return handler.SendMail(ctx, event)
+			if _, err = app.Create(ctx, email.CreateCommand{
+				Recipient: event.Recipient,
+				Sender:    event.Sender,
+				Data:      event.Data,
+				Template:  event.Template,
+				From:      event.From,
+			}); err != nil {
+				return err
+			}
+
+			return nil
 		})
 }

@@ -6,18 +6,19 @@ import (
 	"github.com/ose-micro/cqrs"
 )
 
-type DefaultEvent struct {
+type DomainEvent struct {
 	Id           string    `json:"id"`
 	Content      string    `json:"content"`
 	Subject      string    `json:"subject"`
+	Count        int32       `json:"count"`
 	Placeholders []string  `json:"placeholders"`
 	CreatedAt    time.Time `json:"createdAt"`
 	UpdatedAt    time.Time `json:"updatedAt"`
 }
 
 // EventName implements cqrs.Event.
-func (u DefaultEvent) EventName() string {
+func (u DomainEvent) EventName() string {
 	return UPDATED_COMMAND
 }
 
-var _ cqrs.Event = DefaultEvent{}
+var _ cqrs.Event = DomainEvent{}

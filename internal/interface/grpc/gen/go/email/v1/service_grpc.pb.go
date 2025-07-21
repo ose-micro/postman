@@ -19,11 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	EmailService_Create_FullMethodName  = "/email.v1.EmailService/Create"
-	EmailService_Read_FullMethodName    = "/email.v1.EmailService/Read"
-	EmailService_ReadOne_FullMethodName = "/email.v1.EmailService/ReadOne"
-	EmailService_Resend_FullMethodName  = "/email.v1.EmailService/Resend"
-	EmailService_Delete_FullMethodName  = "/email.v1.EmailService/Delete"
+	EmailService_Create_FullMethodName = "/email.v1.EmailService/Create"
+	EmailService_Read_FullMethodName   = "/email.v1.EmailService/Read"
+	EmailService_Resend_FullMethodName = "/email.v1.EmailService/Resend"
+	EmailService_Delete_FullMethodName = "/email.v1.EmailService/Delete"
 )
 
 // EmailServiceClient is the client API for EmailService service.
@@ -32,7 +31,6 @@ const (
 type EmailServiceClient interface {
 	Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*CreateResponse, error)
 	Read(ctx context.Context, in *ReadRequest, opts ...grpc.CallOption) (*ReadResponse, error)
-	ReadOne(ctx context.Context, in *ReadOneRequest, opts ...grpc.CallOption) (*ReadOneResponse, error)
 	Resend(ctx context.Context, in *ResendRequest, opts ...grpc.CallOption) (*ResendResponse, error)
 	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error)
 }
@@ -65,16 +63,6 @@ func (c *emailServiceClient) Read(ctx context.Context, in *ReadRequest, opts ...
 	return out, nil
 }
 
-func (c *emailServiceClient) ReadOne(ctx context.Context, in *ReadOneRequest, opts ...grpc.CallOption) (*ReadOneResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ReadOneResponse)
-	err := c.cc.Invoke(ctx, EmailService_ReadOne_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *emailServiceClient) Resend(ctx context.Context, in *ResendRequest, opts ...grpc.CallOption) (*ResendResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ResendResponse)
@@ -101,7 +89,6 @@ func (c *emailServiceClient) Delete(ctx context.Context, in *DeleteRequest, opts
 type EmailServiceServer interface {
 	Create(context.Context, *CreateRequest) (*CreateResponse, error)
 	Read(context.Context, *ReadRequest) (*ReadResponse, error)
-	ReadOne(context.Context, *ReadOneRequest) (*ReadOneResponse, error)
 	Resend(context.Context, *ResendRequest) (*ResendResponse, error)
 	Delete(context.Context, *DeleteRequest) (*DeleteResponse, error)
 	mustEmbedUnimplementedEmailServiceServer()
@@ -119,9 +106,6 @@ func (UnimplementedEmailServiceServer) Create(context.Context, *CreateRequest) (
 }
 func (UnimplementedEmailServiceServer) Read(context.Context, *ReadRequest) (*ReadResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Read not implemented")
-}
-func (UnimplementedEmailServiceServer) ReadOne(context.Context, *ReadOneRequest) (*ReadOneResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ReadOne not implemented")
 }
 func (UnimplementedEmailServiceServer) Resend(context.Context, *ResendRequest) (*ResendResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Resend not implemented")
@@ -186,24 +170,6 @@ func _EmailService_Read_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
-func _EmailService_ReadOne_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ReadOneRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(EmailServiceServer).ReadOne(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: EmailService_ReadOne_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(EmailServiceServer).ReadOne(ctx, req.(*ReadOneRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _EmailService_Resend_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ResendRequest)
 	if err := dec(in); err != nil {
@@ -254,10 +220,6 @@ var EmailService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Read",
 			Handler:    _EmailService_Read_Handler,
-		},
-		{
-			MethodName: "ReadOne",
-			Handler:    _EmailService_ReadOne_Handler,
 		},
 		{
 			MethodName: "Resend",

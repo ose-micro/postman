@@ -6,9 +6,7 @@ import (
 
 	"github.com/moriba-cloud/ose-postman/internal/app"
 	"github.com/moriba-cloud/ose-postman/internal/domain/template"
-	templateDomain "github.com/moriba-cloud/ose-postman/internal/domain/template"
 	templatev1 "github.com/moriba-cloud/ose-postman/internal/interface/grpc/gen/go/template/v1"
-	"github.com/ose-micro/core/dto"
 	"github.com/ose-micro/core/logger"
 	"github.com/ose-micro/core/tracing"
 	"go.opentelemetry.io/otel/attribute"
@@ -21,25 +19,26 @@ import (
 type (
 	templateHandler struct {
 		templatev1.UnimplementedTemplateServiceServer
-		app    templateDomain.App
+		app    template.App
 		log    logger.Logger
 		tracer tracing.Tracer
 	}
 )
 
-func (r *templateHandler) response(param templateDomain.Domain) *templatev1.Template {
+func (e *templateHandler) response(param template.Public) *templatev1.Template {
 	return &templatev1.Template{
-		Id:        param.GetID(),
-		Subject: param.GetSubject(),
-		Content: param.GetContent(),
-		Placeholders: param.GetPlaceholders(),
-		CreatedAt: timestamppb.New(param.GetCreatedAt()),
-		UpdatedAt: timestamppb.New(param.GetUpdatedAt()),
+		Id:           param.Id,
+		Count:        param.Count,
+		Subject:      param.Subject,
+		Content:      param.Content,
+		Placeholders: param.Placeholders,
+		CreatedAt:    timestamppb.New(param.CreatedAt),
+		UpdatedAt:    timestamppb.New(param.UpdatedAt),
 	}
 }
 
-func (r *templateHandler) Create(ctx context.Context, request *templatev1.CreateRequest) (*templatev1.CreateResponse, error) {
-	ctx, span := r.tracer.Start(ctx, "interface.grpc.template.create.handler", trace.WithAttributes(
+func (e *templateHandler) Create(ctx context.Context, request *templatev1.CreateRequest) (*templatev1.CreateResponse, error) {
+	ctx, span := e.tracer.Start(ctx, "interface.grpc.template.create.handler", trace.WithAttributes(
 		attribute.String("operation", "CREATE"),
 		attribute.String("payload", fmt.Sprintf("%v", request)),
 	))
@@ -52,11 +51,11 @@ func (r *templateHandler) Create(ctx context.Context, request *templatev1.Create
 		Placeholders: request.Placeholders,
 	}
 
-	record, err := r.app.Create(ctx, payload)
+	record, err := e.app.Create(ctx, payload)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
-		r.log.Error("failed to create template",
+		e.log.Error("failed to create template",
 			zap.String("trace_id", traceId),
 			zap.String("operation", "CREATE"),
 			zap.Error(err),
@@ -65,7 +64,7 @@ func (r *templateHandler) Create(ctx context.Context, request *templatev1.Create
 		return nil, err
 	}
 
-	r.log.Info("template create process successfully",
+	e.log.Info("template create process successfully",
 		zap.String("trace_id", traceId),
 		zap.String("operation", "CREATE"),
 		zap.Any("payload", request),
@@ -73,12 +72,12 @@ func (r *templateHandler) Create(ctx context.Context, request *templatev1.Create
 
 	return &templatev1.CreateResponse{
 		Message: "template create successfully",
-		Record:  r.response(record),
+		Record:  e.response(record.MakePublic()),
 	}, nil
 }
 
-func (t *templateHandler) Read(ctx context.Context, request *templatev1.ReadRequest) (*templatev1.ReadResponse, error) {
-	ctx, span := t.tracer.Start(ctx, "interface.grpc.template.read.handler", trace.WithAttributes(
+func (e *templateHandler) Read(ctx context.Context, request *templatev1.ReadRequest) (*templatev1.ReadResponse, error) {
+	ctx, span := e.tracer.Start(ctx, "interface.grpc.template.read.handler", trace.WithAttributes(
 		attribute.String("operation", "READ"),
 		attribute.String("payload", fmt.Sprintf("%v", request)),
 	))
@@ -89,7 +88,7 @@ func (t *templateHandler) Read(ctx context.Context, request *templatev1.ReadRequ
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
-		t.log.Error("failed to case to dto",
+		e.log.Error("failed to case to dto",
 			zap.String("trace_id", traceId),
 			zap.String("operation", "READ"),
 			zap.Error(err),
@@ -97,33 +96,11 @@ func (t *templateHandler) Read(ctx context.Context, request *templatev1.ReadRequ
 		return nil, err
 	}
 
-	result, err := t.app.Read(ctx, *query)
+	records, err := e.app.Read(ctx, *query)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
-		t.log.Error("failed to read templates",
-			zap.String("trace_id", traceId),
-			zap.String("operation", "READ"),
-			zap.Error(err),
-		)
-		return nil, err
-	}
-
-	records := make([]*templatev1.Template, len(result))
-	for i, o := range result {
-		records[i] = t.response(o)
-	}
-
-	resQuery, err := buildGRPCRequest(&dto.Request{
-		Pagination: &dto.Pagination{
-			Page:  query.Pagination.Page,
-			Limit: query.Pagination.Limit,
-		},
-	})
-	if err != nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, err.Error())
-		t.log.Error("failed to case to grpc",
+		e.log.Error("failed to read roles",
 			zap.String("trace_id", traceId),
 			zap.String("operation", "READ"),
 			zap.Error(err),
@@ -132,8 +109,24 @@ func (t *templateHandler) Read(ctx context.Context, request *templatev1.ReadRequ
 	}
 
 	return &templatev1.ReadResponse{
-		Records: records,
-		Query:   resQuery,
+		Result: func() map[string]*templatev1.Templates {
+			data := map[string]*templatev1.Templates{}
+
+			for k, v := range records {
+				switch x := v.(type) {
+				case []template.Public:
+					list := make([]*templatev1.Template, 0)
+					for _, v := range x {
+						list = append(list, e.response(v))
+					}
+					data[k] = &templatev1.Templates{
+						Data: list,
+					}
+				}
+			}
+
+			return data
+		}(),
 	}, nil
 }
 
@@ -166,42 +159,6 @@ func (r *templateHandler) Update(ctx context.Context, request *templatev1.Update
 
 	return &templatev1.UpdateResponse{
 		Message: "template update successfully",
-	}, nil
-}
-
-func (r *templateHandler) ReadOne(ctx context.Context, request *templatev1.ReadOneRequest) (*templatev1.ReadOneResponse, error) {
-	ctx, span := r.tracer.Start(ctx, "interface.grpc.template.read_one.handler", trace.WithAttributes(
-		attribute.String("operation", "READ_ONE"),
-		attribute.String("payload", fmt.Sprintf("%v", request)),
-	))
-	defer span.End()
-
-	traceId := trace.SpanContextFromContext(ctx).TraceID().String()
-	filters := make([]dto.Filter, 0)
-
-	for _, filter := range request.Filter {
-		filters = append(filters, dto.Filter{
-			Field:    filter.Field,
-			Operator: enumToOperator(filter.Operator),
-			Value:    processValue(filter),
-		})
-	}
-
-	campaign, err := r.app.ReadOne(ctx, filters...)
-	if err != nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, err.Error())
-		r.log.Error("failed to case to grpc",
-			zap.String("trace_id", traceId),
-			zap.String("operation", "READ_ONE"),
-			zap.Error(err),
-		)
-		return nil, err
-	}
-
-	return &templatev1.ReadOneResponse{
-		Message: "template read successfully",
-		Record:  r.response(campaign),
 	}, nil
 }
 

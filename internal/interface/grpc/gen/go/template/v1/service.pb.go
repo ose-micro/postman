@@ -24,40 +24,35 @@ var File_template_v1_service_proto protoreflect.FileDescriptor
 
 const file_template_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x19template/v1/service.proto\x12\vtemplate.v1\x1a\x16template/v1/data.proto2\xdd\x02\n" +
+	"\x19template/v1/service.proto\x12\vtemplate.v1\x1a\x16template/v1/data.proto2\x97\x02\n" +
 	"\x0fTemplateService\x12A\n" +
 	"\x06Create\x12\x1a.template.v1.CreateRequest\x1a\x1b.template.v1.CreateResponse\x12;\n" +
-	"\x04Read\x12\x18.template.v1.ReadRequest\x1a\x19.template.v1.ReadResponse\x12D\n" +
-	"\aReadOne\x12\x1b.template.v1.ReadOneRequest\x1a\x1c.template.v1.ReadOneResponse\x12A\n" +
+	"\x04Read\x12\x18.template.v1.ReadRequest\x1a\x19.template.v1.ReadResponse\x12A\n" +
 	"\x06Update\x12\x1a.template.v1.UpdateRequest\x1a\x1b.template.v1.UpdateResponse\x12A\n" +
 	"\x06Delete\x12\x1a.template.v1.DeleteRequest\x1a\x1b.template.v1.DeleteResponseB\xc7\x01\n" +
 	"\x0fcom.template.v1B\fServiceProtoP\x01ZYgithub.com/moriba-cloud/ose-postman/internal/interface/grpc/gen/go/template/v1;templatev1\xa2\x02\x03TXX\xaa\x02\vTemplate.V1\xca\x02\vTemplate\\V1\xe2\x02\x17Template\\V1\\GPBMetadata\xea\x02\fTemplate::V1b\x06proto3"
 
 var file_template_v1_service_proto_goTypes = []any{
-	(*CreateRequest)(nil),   // 0: template.v1.CreateRequest
-	(*ReadRequest)(nil),     // 1: template.v1.ReadRequest
-	(*ReadOneRequest)(nil),  // 2: template.v1.ReadOneRequest
-	(*UpdateRequest)(nil),   // 3: template.v1.UpdateRequest
-	(*DeleteRequest)(nil),   // 4: template.v1.DeleteRequest
-	(*CreateResponse)(nil),  // 5: template.v1.CreateResponse
-	(*ReadResponse)(nil),    // 6: template.v1.ReadResponse
-	(*ReadOneResponse)(nil), // 7: template.v1.ReadOneResponse
-	(*UpdateResponse)(nil),  // 8: template.v1.UpdateResponse
-	(*DeleteResponse)(nil),  // 9: template.v1.DeleteResponse
+	(*CreateRequest)(nil),  // 0: template.v1.CreateRequest
+	(*ReadRequest)(nil),    // 1: template.v1.ReadRequest
+	(*UpdateRequest)(nil),  // 2: template.v1.UpdateRequest
+	(*DeleteRequest)(nil),  // 3: template.v1.DeleteRequest
+	(*CreateResponse)(nil), // 4: template.v1.CreateResponse
+	(*ReadResponse)(nil),   // 5: template.v1.ReadResponse
+	(*UpdateResponse)(nil), // 6: template.v1.UpdateResponse
+	(*DeleteResponse)(nil), // 7: template.v1.DeleteResponse
 }
 var file_template_v1_service_proto_depIdxs = []int32{
 	0, // 0: template.v1.TemplateService.Create:input_type -> template.v1.CreateRequest
 	1, // 1: template.v1.TemplateService.Read:input_type -> template.v1.ReadRequest
-	2, // 2: template.v1.TemplateService.ReadOne:input_type -> template.v1.ReadOneRequest
-	3, // 3: template.v1.TemplateService.Update:input_type -> template.v1.UpdateRequest
-	4, // 4: template.v1.TemplateService.Delete:input_type -> template.v1.DeleteRequest
-	5, // 5: template.v1.TemplateService.Create:output_type -> template.v1.CreateResponse
-	6, // 6: template.v1.TemplateService.Read:output_type -> template.v1.ReadResponse
-	7, // 7: template.v1.TemplateService.ReadOne:output_type -> template.v1.ReadOneResponse
-	8, // 8: template.v1.TemplateService.Update:output_type -> template.v1.UpdateResponse
-	9, // 9: template.v1.TemplateService.Delete:output_type -> template.v1.DeleteResponse
-	5, // [5:10] is the sub-list for method output_type
-	0, // [0:5] is the sub-list for method input_type
+	2, // 2: template.v1.TemplateService.Update:input_type -> template.v1.UpdateRequest
+	3, // 3: template.v1.TemplateService.Delete:input_type -> template.v1.DeleteRequest
+	4, // 4: template.v1.TemplateService.Create:output_type -> template.v1.CreateResponse
+	5, // 5: template.v1.TemplateService.Read:output_type -> template.v1.ReadResponse
+	6, // 6: template.v1.TemplateService.Update:output_type -> template.v1.UpdateResponse
+	7, // 7: template.v1.TemplateService.Delete:output_type -> template.v1.DeleteResponse
+	4, // [4:8] is the sub-list for method output_type
+	0, // [0:4] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name

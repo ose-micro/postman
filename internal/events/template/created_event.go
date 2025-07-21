@@ -15,15 +15,15 @@ import (
 	"go.uber.org/zap"
 )
 
-type deletedEvent struct {
-	repo   template.Repository
+type createdEventHandler struct {
+	repo   template.Read
 	log    logger.Logger
 	tracer tracing.Tracer
 	bs     domain.Domain
 }
 
-func (d *deletedEvent) ToDomain(event template.DefaultEvent) (*template.Domain, error) {
-	return d.bs.Template.Existing(template.Params{
+func (c *createdEventHandler) ToDomain(event template.DomainEvent) (template.Domain, error) {
+	record, err := c.bs.Template.Existing(template.Params{
 		Id:           event.Id,
 		Content:      event.Content,
 		Subject:      event.Subject,
@@ -31,12 +31,18 @@ func (d *deletedEvent) ToDomain(event template.DefaultEvent) (*template.Domain, 
 		CreatedAt:    event.CreatedAt,
 		UpdatedAt:    event.UpdatedAt,
 	})
+
+	if err != nil {
+		return template.Domain{}, err
+	}
+
+	return *record, nil
 }
 
 // Handle implements cqrs.EventHandle.
-func (d *deletedEvent) Handle(ctx context.Context, event template.DefaultEvent) error {
-	ctx, span := d.tracer.Start(ctx, "app.template.event.deleted.handler", trace.WithAttributes(
-		attribute.String("operation", "DELETE"),
+func (c *createdEventHandler) Handle(ctx context.Context, event template.DomainEvent) error {
+	ctx, span := c.tracer.Start(ctx, "app.template.created.event.handler", trace.WithAttributes(
+		attribute.String("operation", "CREATED_EVENT"),
 		attribute.String("payload", fmt.Sprintf("%v", event)),
 	))
 	defer span.End()
@@ -44,13 +50,13 @@ func (d *deletedEvent) Handle(ctx context.Context, event template.DefaultEvent) 
 	traceId := trace.SpanContextFromContext(ctx).TraceID().String()
 
 	// cast to domain
-	payload, err := d.ToDomain(event)
+	payload, err := c.ToDomain(event)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
-		d.log.Error("failed to cast to domain",
+		c.log.Error("fail to cast to domain",
 			zap.String("trace_id", traceId),
-			zap.String("operation", "DELETE"),
+			zap.String("operation", "CREATED_EVENT"),
 			zap.Error(err),
 		)
 
@@ -58,29 +64,29 @@ func (d *deletedEvent) Handle(ctx context.Context, event template.DefaultEvent) 
 	}
 
 	// save to db
-	if err := d.repo.Delete(ctx, *payload); err != nil {
+	if err := c.repo.Create(ctx, payload); err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
-		d.log.Error("failed to delete template",
+		c.log.Error("failed to save to db",
 			zap.String("trace_id", traceId),
-			zap.String("operation", "DELETE"),
+			zap.String("operation", "CREATED_EVENT"),
 			zap.Error(err),
 		)
 
 		return err
 	}
 
-	d.log.Info("delete process complete successfully",
+	c.log.Info("created process complete successfully",
 		zap.String("trace_id", traceId),
-		zap.String("operation", "DELETE"),
+		zap.String("operation", "CREATED_EVENT"),
 		zap.Any("payload", event),
 	)
 	return nil
 }
 
-func newDeletedEvent(bs domain.Domain, repo template.Repository, log logger.Logger,
-	tracer tracing.Tracer) cqrs.EventHandle[template.DefaultEvent] {
-	return &deletedEvent{
+func newCreatedEvent(bs domain.Domain, repo template.Read, log logger.Logger,
+	tracer tracing.Tracer) cqrs.EventHandle[template.DomainEvent] {
+	return &createdEventHandler{
 		repo:   repo,
 		log:    log,
 		tracer: tracer,

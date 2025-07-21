@@ -19,7 +19,7 @@ import (
 
 // Handler
 type createCommandHandler struct {
-	repo   template.Repository
+	repo   template.Write
 	log    logger.Logger
 	mailer *mailer.Mailer
 	bus    bus.Bus
@@ -87,7 +87,7 @@ func (c *createCommandHandler) Handle(ctx context.Context, command template.Crea
 	}
 
 	// publish bus
-	err = c.bus.Publish(command.CommandName(), template.DefaultEvent(domain.MakePublic()))
+	err = c.bus.Publish(command.CommandName(), template.DomainEvent(domain.MakePublic()))
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
@@ -108,7 +108,7 @@ func (c *createCommandHandler) Handle(ctx context.Context, command template.Crea
 	return *domain, nil
 }
 
-func newCreateCommandHandler(bs domain.Domain, repo template.Repository, log logger.Logger,
+func newCreateCommandHandler(bs domain.Domain, repo template.Write, log logger.Logger,
 	tracer tracing.Tracer, bus bus.Bus, mailer *mailer.Mailer) cqrs.CommandHandle[template.CreateCommand, template.Domain] {
 	return &createCommandHandler{
 		repo:   repo,

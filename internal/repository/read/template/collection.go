@@ -17,11 +17,11 @@ type Collection struct {
 
 func newCollection(params template.Domain) Collection {
 	return Collection{
-		Id: params.GetID(),
-		Subject: params.GetSubject(),
-		Content: params.GetContent(),
+		Id:           params.GetID(),
+		Subject:      params.GetSubject(),
+		Content:      params.GetContent(),
 		Placeholders: params.GetPlaceholders(),
-		CreatedAt: params.GetCreatedAt(),
-		UpdatedAt: params.GetUpdatedAt(),
+		CreatedAt:    params.GetCreatedAt(),
+		UpdatedAt:    params.GetUpdatedAt(),
 	}
 }

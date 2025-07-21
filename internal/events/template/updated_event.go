@@ -15,15 +15,15 @@ import (
 	"go.uber.org/zap"
 )
 
-type updatedEvent struct {
-	repo   template.Repository
+type updatedEventHandler struct {
+	repo   template.Read
 	log    logger.Logger
 	tracer tracing.Tracer
 	bs     domain.Domain
 }
 
-func (u *updatedEvent) ToDomain(event template.DefaultEvent) (template.Domain, error) {
-	record, err := u.bs.Template.Existing(template.Params{
+func (c *updatedEventHandler) ToDomain(event template.DomainEvent) (template.Domain, error) {
+	record, err := c.bs.Template.Existing(template.Params{
 		Id:           event.Id,
 		Content:      event.Content,
 		Subject:      event.Subject,
@@ -40,9 +40,9 @@ func (u *updatedEvent) ToDomain(event template.DefaultEvent) (template.Domain, e
 }
 
 // Handle implements cqrs.EventHandle.
-func (u *updatedEvent) Handle(ctx context.Context, event template.DefaultEvent) error {
-	ctx, span := u.tracer.Start(ctx, "app.template.updated.event.handler", trace.WithAttributes(
-		attribute.String("operation", "UPDATE"),
+func (c *updatedEventHandler) Handle(ctx context.Context, event template.DomainEvent) error {
+	ctx, span := c.tracer.Start(ctx, "app.template.created.event.handler", trace.WithAttributes(
+		attribute.String("operation", "UPDATED_EVENT"),
 		attribute.String("payload", fmt.Sprintf("%v", event)),
 	))
 	defer span.End()
@@ -50,43 +50,43 @@ func (u *updatedEvent) Handle(ctx context.Context, event template.DefaultEvent) 
 	traceId := trace.SpanContextFromContext(ctx).TraceID().String()
 
 	// cast to domain
-	payload, err := u.ToDomain(event)
+	payload, err := c.ToDomain(event)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
-		u.log.Error("failed to cast to domain",
+		c.log.Error("fail to cast to domain",
 			zap.String("trace_id", traceId),
-			zap.String("operation", "UPDATE"),
-			zap.Any("details", err),
-		)
-
-		return err
-	}
-
-	// save to db
-	if err := u.repo.Update(ctx, payload); err != nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, err.Error())
-		u.log.Error("failed to update to mongo",
-			zap.String("trace_id", traceId),
-			zap.String("operation", "UPDATE"),
+			zap.String("operation", "UPDATED_EVENT"),
 			zap.Error(err),
 		)
 
 		return err
 	}
 
-	u.log.Info("updated process complete successfully",
+	// save to db
+	if err := c.repo.Update(ctx, payload); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		c.log.Error("failed to save to db",
+			zap.String("trace_id", traceId),
+			zap.String("operation", "UPDATED_EVENT"),
+			zap.Error(err),
+		)
+
+		return err
+	}
+
+	c.log.Info("created process complete successfully",
 		zap.String("trace_id", traceId),
-		zap.String("operation", "UPDATE"),
+		zap.String("operation", "UPDATED_EVENT"),
 		zap.Any("payload", event),
 	)
 	return nil
 }
 
-func newUpdatedEvent(bs domain.Domain, repo template.Repository, log logger.Logger,
-	tracer tracing.Tracer) cqrs.EventHandle[template.DefaultEvent] {
-	return &updatedEvent{
+func newUpdatedEvent(bs domain.Domain, repo template.Read, log logger.Logger,
+	tracer tracing.Tracer) cqrs.EventHandle[template.DomainEvent] {
+	return &updatedEventHandler{
 		repo:   repo,
 		log:    log,
 		tracer: tracer,

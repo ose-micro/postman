@@ -19,11 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	TemplateService_Create_FullMethodName  = "/template.v1.TemplateService/Create"
-	TemplateService_Read_FullMethodName    = "/template.v1.TemplateService/Read"
-	TemplateService_ReadOne_FullMethodName = "/template.v1.TemplateService/ReadOne"
-	TemplateService_Update_FullMethodName  = "/template.v1.TemplateService/Update"
-	TemplateService_Delete_FullMethodName  = "/template.v1.TemplateService/Delete"
+	TemplateService_Create_FullMethodName = "/template.v1.TemplateService/Create"
+	TemplateService_Read_FullMethodName   = "/template.v1.TemplateService/Read"
+	TemplateService_Update_FullMethodName = "/template.v1.TemplateService/Update"
+	TemplateService_Delete_FullMethodName = "/template.v1.TemplateService/Delete"
 )
 
 // TemplateServiceClient is the client API for TemplateService service.
@@ -32,7 +31,6 @@ const (
 type TemplateServiceClient interface {
 	Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*CreateResponse, error)
 	Read(ctx context.Context, in *ReadRequest, opts ...grpc.CallOption) (*ReadResponse, error)
-	ReadOne(ctx context.Context, in *ReadOneRequest, opts ...grpc.CallOption) (*ReadOneResponse, error)
 	Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*UpdateResponse, error)
 	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error)
 }
@@ -65,16 +63,6 @@ func (c *templateServiceClient) Read(ctx context.Context, in *ReadRequest, opts 
 	return out, nil
 }
 
-func (c *templateServiceClient) ReadOne(ctx context.Context, in *ReadOneRequest, opts ...grpc.CallOption) (*ReadOneResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ReadOneResponse)
-	err := c.cc.Invoke(ctx, TemplateService_ReadOne_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *templateServiceClient) Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*UpdateResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(UpdateResponse)
@@ -101,7 +89,6 @@ func (c *templateServiceClient) Delete(ctx context.Context, in *DeleteRequest, o
 type TemplateServiceServer interface {
 	Create(context.Context, *CreateRequest) (*CreateResponse, error)
 	Read(context.Context, *ReadRequest) (*ReadResponse, error)
-	ReadOne(context.Context, *ReadOneRequest) (*ReadOneResponse, error)
 	Update(context.Context, *UpdateRequest) (*UpdateResponse, error)
 	Delete(context.Context, *DeleteRequest) (*DeleteResponse, error)
 	mustEmbedUnimplementedTemplateServiceServer()
@@ -119,9 +106,6 @@ func (UnimplementedTemplateServiceServer) Create(context.Context, *CreateRequest
 }
 func (UnimplementedTemplateServiceServer) Read(context.Context, *ReadRequest) (*ReadResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Read not implemented")
-}
-func (UnimplementedTemplateServiceServer) ReadOne(context.Context, *ReadOneRequest) (*ReadOneResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ReadOne not implemented")
 }
 func (UnimplementedTemplateServiceServer) Update(context.Context, *UpdateRequest) (*UpdateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
@@ -186,24 +170,6 @@ func _TemplateService_Read_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TemplateService_ReadOne_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ReadOneRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TemplateServiceServer).ReadOne(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TemplateService_ReadOne_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TemplateServiceServer).ReadOne(ctx, req.(*ReadOneRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _TemplateService_Update_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateRequest)
 	if err := dec(in); err != nil {
@@ -254,10 +220,6 @@ var TemplateService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Read",
 			Handler:    _TemplateService_Read_Handler,
-		},
-		{
-			MethodName: "ReadOne",
-			Handler:    _TemplateService_ReadOne_Handler,
 		},
 		{
 			MethodName: "Update",

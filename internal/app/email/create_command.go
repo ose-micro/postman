@@ -3,7 +3,6 @@ package email
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/moriba-cloud/ose-postman/internal/domain"
 	"github.com/moriba-cloud/ose-postman/internal/domain/email"
@@ -20,44 +19,6 @@ import (
 	"go.uber.org/zap"
 )
 
-type CreateCommand struct {
-	Recipient string
-	Sender    *string
-	Data      map[string]interface{}
-	Template  string
-	From      string
-}
-
-// CommandName implements cqrs.Command.
-func (c CreateCommand) CommandName() string {
-	return email.CREATED_COMMAND
-}
-
-// Validate implements cqrs.Command.
-func (c CreateCommand) Validate() error {
-	fields := make([]string, 0)
-
-	if c.Recipient == "" {
-		fields = append(fields, "recipient is required")
-	}
-
-	if c.Template == "" {
-		fields = append(fields, "template is required")
-	}
-
-	if c.From == "" {
-		fields = append(fields, "from is required")
-	}
-
-	if len(fields) > 0 {
-		return fmt.Errorf("%s", strings.Join(fields, ", "))
-	}
-
-	return nil
-}
-
-var _ cqrs.Command = CreateCommand{}
-
 // Handler
 type createCommandHandler struct {
 	repo   write.Repository
@@ -69,7 +30,7 @@ type createCommandHandler struct {
 }
 
 // Handle implements cqrs.CommandHandle.
-func (c *createCommandHandler) Handle(ctx context.Context, command CreateCommand) (email.Domain, error) {
+func (c *createCommandHandler) Handle(ctx context.Context, command email.CreateCommand) (email.Domain, error) {
 	ctx, span := c.tracer.Start(ctx, "app.email.create.command.handler", trace.WithAttributes(
 		attribute.String("operation", "CREATE"),
 		attribute.String("payload", fmt.Sprintf("%v", command)),
@@ -91,10 +52,14 @@ func (c *createCommandHandler) Handle(ctx context.Context, command CreateCommand
 		return email.Domain{}, err
 	}
 
-	temp, err := c.repo.Template.ReadOne(ctx, dto.Filter{
-		Field:    "id",
-		Operator: dto.EQUAL,
-		Value:    command.Template,
+	temp, err := c.repo.Template.Read(ctx, dto.Query{
+		Filters: []dto.Filter{
+			{
+				Field: "id",
+				Op: dto.OpEq,
+				Value: command.Template,
+			},
+		},
 	})
 
 	if err != nil {
@@ -123,7 +88,7 @@ func (c *createCommandHandler) Handle(ctx context.Context, command CreateCommand
 
 	state := email.StateFailed
 	err = c.mailer.Send(ctx, mailer.Params{
-		Sender:    *command.Sender,
+		Sender:    command.Sender,
 		Recipient: command.Recipient,
 		Subject:   temp.GetSubject(),
 		Message:   temp.GetContent(),
@@ -197,7 +162,7 @@ func (c *createCommandHandler) Handle(ctx context.Context, command CreateCommand
 
 	public := record.MakePublic()
 	// publish bus
-	err = c.bus.Publish(command.CommandName(), CreatedEvent(public))
+	err = c.bus.Publish(command.CommandName(), email.DomainEvent(public))
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
@@ -219,7 +184,7 @@ func (c *createCommandHandler) Handle(ctx context.Context, command CreateCommand
 }
 
 func newCreateCommandHandler(bs domain.Domain, repo write.Repository, log logger.Logger,
-	tracer tracing.Tracer, bus bus.Bus, mailer *mailer.Mailer) cqrs.CommandHandle[CreateCommand, email.Domain] {
+	tracer tracing.Tracer, bus bus.Bus, mailer *mailer.Mailer) cqrs.CommandHandle[email.CreateCommand, email.Domain] {
 	return &createCommandHandler{
 		repo:   repo,
 		log:    log,

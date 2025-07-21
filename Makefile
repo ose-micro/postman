@@ -16,10 +16,6 @@ buf dep prune:
 push:
 	clear && buf push
 
-.PHONY: gen-storage
-gen-storage:
-	clear && buf generate buf.build/meshop/storage
-
-.PHONY: gen-account
-gen-account:
-	clear && buf generate buf.build/meshop/account
+.PHONY: gen-common
+gen-common:
+	clear && buf generate buf.build/moriba-sl/ose

@@ -9,7 +9,8 @@ package commonv1
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
+	structpb "google.golang.org/protobuf/types/known/structpb"
+	_ "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -22,194 +23,273 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type Operator int32
+type FilterOp int32
 
 const (
-	Operator_UNKNOWN_FILTER     Operator = 0
-	Operator_EQUAL              Operator = 1
-	Operator_LIKE               Operator = 2
-	Operator_BETWEEN            Operator = 3
-	Operator_GREATER_THAN       Operator = 4
-	Operator_LESS_THAN          Operator = 5
-	Operator_GREATER_THAN_EQUAL Operator = 6
-	Operator_LESS_THAN_EQUAL    Operator = 7
-	Operator_DIFFERENCE         Operator = 8
-	Operator_DATE_EQUAL         Operator = 9
-	Operator_BEFORE             Operator = 10
-	Operator_AFTER              Operator = 11
-	Operator_DATE_BETWEEN       Operator = 12
+	FilterOp_OP_UNSPECIFIED FilterOp = 0
+	FilterOp_EQ             FilterOp = 1
+	FilterOp_NE             FilterOp = 2
+	FilterOp_GT             FilterOp = 3
+	FilterOp_GTE            FilterOp = 4
+	FilterOp_LT             FilterOp = 5
+	FilterOp_LTE            FilterOp = 6
+	FilterOp_IN             FilterOp = 7
+	FilterOp_NIN            FilterOp = 8
+	FilterOp_REGEX          FilterOp = 9
 )
 
-// Enum value maps for Operator.
+// Enum value maps for FilterOp.
 var (
-	Operator_name = map[int32]string{
-		0:  "UNKNOWN_FILTER",
-		1:  "EQUAL",
-		2:  "LIKE",
-		3:  "BETWEEN",
-		4:  "GREATER_THAN",
-		5:  "LESS_THAN",
-		6:  "GREATER_THAN_EQUAL",
-		7:  "LESS_THAN_EQUAL",
-		8:  "DIFFERENCE",
-		9:  "DATE_EQUAL",
-		10: "BEFORE",
-		11: "AFTER",
-		12: "DATE_BETWEEN",
+	FilterOp_name = map[int32]string{
+		0: "OP_UNSPECIFIED",
+		1: "EQ",
+		2: "NE",
+		3: "GT",
+		4: "GTE",
+		5: "LT",
+		6: "LTE",
+		7: "IN",
+		8: "NIN",
+		9: "REGEX",
 	}
-	Operator_value = map[string]int32{
-		"UNKNOWN_FILTER":     0,
-		"EQUAL":              1,
-		"LIKE":               2,
-		"BETWEEN":            3,
-		"GREATER_THAN":       4,
-		"LESS_THAN":          5,
-		"GREATER_THAN_EQUAL": 6,
-		"LESS_THAN_EQUAL":    7,
-		"DIFFERENCE":         8,
-		"DATE_EQUAL":         9,
-		"BEFORE":             10,
-		"AFTER":              11,
-		"DATE_BETWEEN":       12,
+	FilterOp_value = map[string]int32{
+		"OP_UNSPECIFIED": 0,
+		"EQ":             1,
+		"NE":             2,
+		"GT":             3,
+		"GTE":            4,
+		"LT":             5,
+		"LTE":            6,
+		"IN":             7,
+		"NIN":            8,
+		"REGEX":          9,
 	}
 )
 
-func (x Operator) Enum() *Operator {
-	p := new(Operator)
+func (x FilterOp) Enum() *FilterOp {
+	p := new(FilterOp)
 	*p = x
 	return p
 }
 
-func (x Operator) String() string {
+func (x FilterOp) String() string {
 	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
 }
 
-func (Operator) Descriptor() protoreflect.EnumDescriptor {
+func (FilterOp) Descriptor() protoreflect.EnumDescriptor {
 	return file_common_v1_common_proto_enumTypes[0].Descriptor()
 }
 
-func (Operator) Type() protoreflect.EnumType {
+func (FilterOp) Type() protoreflect.EnumType {
 	return &file_common_v1_common_proto_enumTypes[0]
 }
 
-func (x Operator) Number() protoreflect.EnumNumber {
+func (x FilterOp) Number() protoreflect.EnumNumber {
 	return protoreflect.EnumNumber(x)
 }
 
-// Deprecated: Use Operator.Descriptor instead.
-func (Operator) EnumDescriptor() ([]byte, []int) {
+// Deprecated: Use FilterOp.Descriptor instead.
+func (FilterOp) EnumDescriptor() ([]byte, []int) {
 	return file_common_v1_common_proto_rawDescGZIP(), []int{0}
 }
 
-type Logical int32
+type AggregationType int32
 
 const (
-	Logical_UNKNOWN_LOGICAL Logical = 0
-	Logical_AND             Logical = 1
-	Logical_OR              Logical = 2
+	AggregationType_AGG_UNSPECIFIED AggregationType = 0
+	AggregationType_SUM             AggregationType = 1
+	AggregationType_AVG             AggregationType = 2
+	AggregationType_COUNT           AggregationType = 3
+	AggregationType_MIN             AggregationType = 4
+	AggregationType_MAX             AggregationType = 5
 )
 
-// Enum value maps for Logical.
+// Enum value maps for AggregationType.
 var (
-	Logical_name = map[int32]string{
-		0: "UNKNOWN_LOGICAL",
-		1: "AND",
-		2: "OR",
+	AggregationType_name = map[int32]string{
+		0: "AGG_UNSPECIFIED",
+		1: "SUM",
+		2: "AVG",
+		3: "COUNT",
+		4: "MIN",
+		5: "MAX",
 	}
-	Logical_value = map[string]int32{
-		"UNKNOWN_LOGICAL": 0,
-		"AND":             1,
-		"OR":              2,
+	AggregationType_value = map[string]int32{
+		"AGG_UNSPECIFIED": 0,
+		"SUM":             1,
+		"AVG":             2,
+		"COUNT":           3,
+		"MIN":             4,
+		"MAX":             5,
 	}
 )
 
-func (x Logical) Enum() *Logical {
-	p := new(Logical)
+func (x AggregationType) Enum() *AggregationType {
+	p := new(AggregationType)
 	*p = x
 	return p
 }
 
-func (x Logical) String() string {
+func (x AggregationType) String() string {
 	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
 }
 
-func (Logical) Descriptor() protoreflect.EnumDescriptor {
+func (AggregationType) Descriptor() protoreflect.EnumDescriptor {
 	return file_common_v1_common_proto_enumTypes[1].Descriptor()
 }
 
-func (Logical) Type() protoreflect.EnumType {
+func (AggregationType) Type() protoreflect.EnumType {
 	return &file_common_v1_common_proto_enumTypes[1]
 }
 
-func (x Logical) Number() protoreflect.EnumNumber {
+func (x AggregationType) Number() protoreflect.EnumNumber {
 	return protoreflect.EnumNumber(x)
 }
 
-// Deprecated: Use Logical.Descriptor instead.
-func (Logical) EnumDescriptor() ([]byte, []int) {
+// Deprecated: Use AggregationType.Descriptor instead.
+func (AggregationType) EnumDescriptor() ([]byte, []int) {
 	return file_common_v1_common_proto_rawDescGZIP(), []int{1}
 }
 
-type Order int32
+type SortOrder int32
 
 const (
-	Order_UNKNOWN_ORDER Order = 0
-	Order_ASC           Order = 1
-	Order_DESC          Order = 2
+	SortOrder_SORT_UNSPECIFIED SortOrder = 0
+	SortOrder_ASC              SortOrder = 1
+	SortOrder_DESC             SortOrder = 2
 )
 
-// Enum value maps for Order.
+// Enum value maps for SortOrder.
 var (
-	Order_name = map[int32]string{
-		0: "UNKNOWN_ORDER",
+	SortOrder_name = map[int32]string{
+		0: "SORT_UNSPECIFIED",
 		1: "ASC",
 		2: "DESC",
 	}
-	Order_value = map[string]int32{
-		"UNKNOWN_ORDER": 0,
-		"ASC":           1,
-		"DESC":          2,
+	SortOrder_value = map[string]int32{
+		"SORT_UNSPECIFIED": 0,
+		"ASC":              1,
+		"DESC":             2,
 	}
 )
 
-func (x Order) Enum() *Order {
-	p := new(Order)
+func (x SortOrder) Enum() *SortOrder {
+	p := new(SortOrder)
 	*p = x
 	return p
 }
 
-func (x Order) String() string {
+func (x SortOrder) String() string {
 	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
 }
 
-func (Order) Descriptor() protoreflect.EnumDescriptor {
+func (SortOrder) Descriptor() protoreflect.EnumDescriptor {
 	return file_common_v1_common_proto_enumTypes[2].Descriptor()
 }
 
-func (Order) Type() protoreflect.EnumType {
+func (SortOrder) Type() protoreflect.EnumType {
 	return &file_common_v1_common_proto_enumTypes[2]
 }
 
-func (x Order) Number() protoreflect.EnumNumber {
+func (x SortOrder) Number() protoreflect.EnumNumber {
 	return protoreflect.EnumNumber(x)
 }
 
-// Deprecated: Use Order.Descriptor instead.
-func (Order) EnumDescriptor() ([]byte, []int) {
+// Deprecated: Use SortOrder.Descriptor instead.
+func (SortOrder) EnumDescriptor() ([]byte, []int) {
 	return file_common_v1_common_proto_rawDescGZIP(), []int{2}
 }
 
+type ComputedOperator int32
+
+const (
+	ComputedOperator_OCP_UNSPECIFIED ComputedOperator = 0
+	ComputedOperator_MULTIPLY        ComputedOperator = 1
+	ComputedOperator_ADD             ComputedOperator = 2
+	ComputedOperator_DIVIDE          ComputedOperator = 3
+	ComputedOperator_SUBTRACT        ComputedOperator = 4
+	ComputedOperator_WEEK            ComputedOperator = 5
+	ComputedOperator_YEAR            ComputedOperator = 6
+	ComputedOperator_MONTH           ComputedOperator = 7
+	ComputedOperator_DAY_OF_MONTH    ComputedOperator = 8
+	ComputedOperator_TO_UPPER        ComputedOperator = 9
+	ComputedOperator_TO_LOWER        ComputedOperator = 10
+	ComputedOperator_CONCAT          ComputedOperator = 11
+	ComputedOperator_SUBSTR          ComputedOperator = 12
+	ComputedOperator_DATE_TRUNC      ComputedOperator = 13
+	ComputedOperator_IF_NULL         ComputedOperator = 14
+)
+
+// Enum value maps for ComputedOperator.
+var (
+	ComputedOperator_name = map[int32]string{
+		0:  "OCP_UNSPECIFIED",
+		1:  "MULTIPLY",
+		2:  "ADD",
+		3:  "DIVIDE",
+		4:  "SUBTRACT",
+		5:  "WEEK",
+		6:  "YEAR",
+		7:  "MONTH",
+		8:  "DAY_OF_MONTH",
+		9:  "TO_UPPER",
+		10: "TO_LOWER",
+		11: "CONCAT",
+		12: "SUBSTR",
+		13: "DATE_TRUNC",
+		14: "IF_NULL",
+	}
+	ComputedOperator_value = map[string]int32{
+		"OCP_UNSPECIFIED": 0,
+		"MULTIPLY":        1,
+		"ADD":             2,
+		"DIVIDE":          3,
+		"SUBTRACT":        4,
+		"WEEK":            5,
+		"YEAR":            6,
+		"MONTH":           7,
+		"DAY_OF_MONTH":    8,
+		"TO_UPPER":        9,
+		"TO_LOWER":        10,
+		"CONCAT":          11,
+		"SUBSTR":          12,
+		"DATE_TRUNC":      13,
+		"IF_NULL":         14,
+	}
+)
+
+func (x ComputedOperator) Enum() *ComputedOperator {
+	p := new(ComputedOperator)
+	*p = x
+	return p
+}
+
+func (x ComputedOperator) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (ComputedOperator) Descriptor() protoreflect.EnumDescriptor {
+	return file_common_v1_common_proto_enumTypes[3].Descriptor()
+}
+
+func (ComputedOperator) Type() protoreflect.EnumType {
+	return &file_common_v1_common_proto_enumTypes[3]
+}
+
+func (x ComputedOperator) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use ComputedOperator.Descriptor instead.
+func (ComputedOperator) EnumDescriptor() ([]byte, []int) {
+	return file_common_v1_common_proto_rawDescGZIP(), []int{3}
+}
+
 type Filter struct {
-	state    protoimpl.MessageState `protogen:"open.v1"`
-	Field    string                 `protobuf:"bytes,1,opt,name=field,proto3" json:"field,omitempty"`
-	Operator Operator               `protobuf:"varint,2,opt,name=operator,proto3,enum=common.v1.Operator" json:"operator,omitempty"`
-	// Types that are valid to be assigned to Value:
-	//
-	//	*Filter_StringValue
-	//	*Filter_Int32Value
-	//	*Filter_TimeValue
-	//	*Filter_ValuesValue
-	Value         isFilter_Value `protobuf_oneof:"value"`
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Field         string                 `protobuf:"bytes,1,opt,name=field,proto3" json:"field,omitempty"`
+	Op            FilterOp               `protobuf:"varint,2,opt,name=op,proto3,enum=common.v1.FilterOp" json:"op,omitempty"`
+	Value         string                 `protobuf:"bytes,3,opt,name=value,proto3" json:"value,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -251,105 +331,43 @@ func (x *Filter) GetField() string {
 	return ""
 }
 
-func (x *Filter) GetOperator() Operator {
+func (x *Filter) GetOp() FilterOp {
 	if x != nil {
-		return x.Operator
+		return x.Op
 	}
-	return Operator_UNKNOWN_FILTER
+	return FilterOp_OP_UNSPECIFIED
 }
 
-func (x *Filter) GetValue() isFilter_Value {
+func (x *Filter) GetValue() string {
 	if x != nil {
 		return x.Value
-	}
-	return nil
-}
-
-func (x *Filter) GetStringValue() string {
-	if x != nil {
-		if x, ok := x.Value.(*Filter_StringValue); ok {
-			return x.StringValue
-		}
 	}
 	return ""
 }
 
-func (x *Filter) GetInt32Value() int32 {
-	if x != nil {
-		if x, ok := x.Value.(*Filter_Int32Value); ok {
-			return x.Int32Value
-		}
-	}
-	return 0
-}
-
-func (x *Filter) GetTimeValue() *timestamppb.Timestamp {
-	if x != nil {
-		if x, ok := x.Value.(*Filter_TimeValue); ok {
-			return x.TimeValue
-		}
-	}
-	return nil
-}
-
-func (x *Filter) GetValuesValue() *Values {
-	if x != nil {
-		if x, ok := x.Value.(*Filter_ValuesValue); ok {
-			return x.ValuesValue
-		}
-	}
-	return nil
-}
-
-type isFilter_Value interface {
-	isFilter_Value()
-}
-
-type Filter_StringValue struct {
-	StringValue string `protobuf:"bytes,3,opt,name=string_value,json=stringValue,proto3,oneof"`
-}
-
-type Filter_Int32Value struct {
-	Int32Value int32 `protobuf:"varint,4,opt,name=int32_value,json=int32Value,proto3,oneof"`
-}
-
-type Filter_TimeValue struct {
-	TimeValue *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=time_value,json=timeValue,proto3,oneof"`
-}
-
-type Filter_ValuesValue struct {
-	ValuesValue *Values `protobuf:"bytes,6,opt,name=values_value,json=valuesValue,proto3,oneof"`
-}
-
-func (*Filter_StringValue) isFilter_Value() {}
-
-func (*Filter_Int32Value) isFilter_Value() {}
-
-func (*Filter_TimeValue) isFilter_Value() {}
-
-func (*Filter_ValuesValue) isFilter_Value() {}
-
-type Values struct {
+type Aggregation struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Values        []string               `protobuf:"bytes,1,rep,name=values,proto3" json:"values,omitempty"`
+	Type          AggregationType        `protobuf:"varint,1,opt,name=type,proto3,enum=common.v1.AggregationType" json:"type,omitempty"`
+	Field         string                 `protobuf:"bytes,2,opt,name=field,proto3" json:"field,omitempty"`
+	As            string                 `protobuf:"bytes,3,opt,name=as,proto3" json:"as,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *Values) Reset() {
-	*x = Values{}
+func (x *Aggregation) Reset() {
+	*x = Aggregation{}
 	mi := &file_common_v1_common_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Values) String() string {
+func (x *Aggregation) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Values) ProtoMessage() {}
+func (*Aggregation) ProtoMessage() {}
 
-func (x *Values) ProtoReflect() protoreflect.Message {
+func (x *Aggregation) ProtoReflect() protoreflect.Message {
 	mi := &file_common_v1_common_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -361,92 +379,107 @@ func (x *Values) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Values.ProtoReflect.Descriptor instead.
-func (*Values) Descriptor() ([]byte, []int) {
+// Deprecated: Use Aggregation.ProtoReflect.Descriptor instead.
+func (*Aggregation) Descriptor() ([]byte, []int) {
 	return file_common_v1_common_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *Values) GetValues() []string {
+func (x *Aggregation) GetType() AggregationType {
 	if x != nil {
-		return x.Values
+		return x.Type
 	}
-	return nil
+	return AggregationType_AGG_UNSPECIFIED
 }
 
-type Sort struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Field         string                 `protobuf:"bytes,1,opt,name=field,proto3" json:"field,omitempty"`
-	Order         Order                  `protobuf:"varint,2,opt,name=order,proto3,enum=common.v1.Order" json:"order,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *Sort) Reset() {
-	*x = Sort{}
-	mi := &file_common_v1_common_proto_msgTypes[2]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *Sort) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Sort) ProtoMessage() {}
-
-func (x *Sort) ProtoReflect() protoreflect.Message {
-	mi := &file_common_v1_common_proto_msgTypes[2]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Sort.ProtoReflect.Descriptor instead.
-func (*Sort) Descriptor() ([]byte, []int) {
-	return file_common_v1_common_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *Sort) GetField() string {
+func (x *Aggregation) GetField() string {
 	if x != nil {
 		return x.Field
 	}
 	return ""
 }
 
-func (x *Sort) GetOrder() Order {
+func (x *Aggregation) GetAs() string {
 	if x != nil {
-		return x.Order
+		return x.As
 	}
-	return Order_UNKNOWN_ORDER
+	return ""
 }
 
-type Pagination struct {
+type SortOption struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
-	Limit         int32                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	Field         string                 `protobuf:"bytes,1,opt,name=field,proto3" json:"field,omitempty"`
+	Order         SortOrder              `protobuf:"varint,2,opt,name=order,proto3,enum=common.v1.SortOrder" json:"order,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *Pagination) Reset() {
-	*x = Pagination{}
+func (x *SortOption) Reset() {
+	*x = SortOption{}
+	mi := &file_common_v1_common_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SortOption) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SortOption) ProtoMessage() {}
+
+func (x *SortOption) ProtoReflect() protoreflect.Message {
+	mi := &file_common_v1_common_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SortOption.ProtoReflect.Descriptor instead.
+func (*SortOption) Descriptor() ([]byte, []int) {
+	return file_common_v1_common_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *SortOption) GetField() string {
+	if x != nil {
+		return x.Field
+	}
+	return ""
+}
+
+func (x *SortOption) GetOrder() SortOrder {
+	if x != nil {
+		return x.Order
+	}
+	return SortOrder_SORT_UNSPECIFIED
+}
+
+type ComputedField struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Operator      ComputedOperator       `protobuf:"varint,2,opt,name=operator,proto3,enum=common.v1.ComputedOperator" json:"operator,omitempty"`
+	Operands      []string               `protobuf:"bytes,3,rep,name=operands,proto3" json:"operands,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ComputedField) Reset() {
+	*x = ComputedField{}
 	mi := &file_common_v1_common_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Pagination) String() string {
+func (x *ComputedField) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Pagination) ProtoMessage() {}
+func (*ComputedField) ProtoMessage() {}
 
-func (x *Pagination) ProtoReflect() protoreflect.Message {
+func (x *ComputedField) ProtoReflect() protoreflect.Message {
 	mi := &file_common_v1_common_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -458,19 +491,126 @@ func (x *Pagination) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Pagination.ProtoReflect.Descriptor instead.
-func (*Pagination) Descriptor() ([]byte, []int) {
+// Deprecated: Use ComputedField.ProtoReflect.Descriptor instead.
+func (*ComputedField) Descriptor() ([]byte, []int) {
 	return file_common_v1_common_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *Pagination) GetPage() int32 {
+func (x *ComputedField) GetName() string {
 	if x != nil {
-		return x.Page
+		return x.Name
+	}
+	return ""
+}
+
+func (x *ComputedField) GetOperator() ComputedOperator {
+	if x != nil {
+		return x.Operator
+	}
+	return ComputedOperator_OCP_UNSPECIFIED
+}
+
+func (x *ComputedField) GetOperands() []string {
+	if x != nil {
+		return x.Operands
+	}
+	return nil
+}
+
+type FacetQuery struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Name           string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Filters        []*Filter              `protobuf:"bytes,2,rep,name=filters,proto3" json:"filters,omitempty"`
+	GroupBy        []string               `protobuf:"bytes,3,rep,name=group_by,json=groupBy,proto3" json:"group_by,omitempty"`
+	Aggregations   []*Aggregation         `protobuf:"bytes,4,rep,name=aggregations,proto3" json:"aggregations,omitempty"`
+	Sort           []*SortOption          `protobuf:"bytes,5,rep,name=sort,proto3" json:"sort,omitempty"`
+	ComputedFields []*ComputedField       `protobuf:"bytes,6,rep,name=computed_fields,json=computedFields,proto3" json:"computed_fields,omitempty"`
+	Skip           int64                  `protobuf:"varint,7,opt,name=skip,proto3" json:"skip,omitempty"`
+	Limit          int64                  `protobuf:"varint,8,opt,name=limit,proto3" json:"limit,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *FacetQuery) Reset() {
+	*x = FacetQuery{}
+	mi := &file_common_v1_common_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *FacetQuery) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FacetQuery) ProtoMessage() {}
+
+func (x *FacetQuery) ProtoReflect() protoreflect.Message {
+	mi := &file_common_v1_common_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FacetQuery.ProtoReflect.Descriptor instead.
+func (*FacetQuery) Descriptor() ([]byte, []int) {
+	return file_common_v1_common_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *FacetQuery) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *FacetQuery) GetFilters() []*Filter {
+	if x != nil {
+		return x.Filters
+	}
+	return nil
+}
+
+func (x *FacetQuery) GetGroupBy() []string {
+	if x != nil {
+		return x.GroupBy
+	}
+	return nil
+}
+
+func (x *FacetQuery) GetAggregations() []*Aggregation {
+	if x != nil {
+		return x.Aggregations
+	}
+	return nil
+}
+
+func (x *FacetQuery) GetSort() []*SortOption {
+	if x != nil {
+		return x.Sort
+	}
+	return nil
+}
+
+func (x *FacetQuery) GetComputedFields() []*ComputedField {
+	if x != nil {
+		return x.ComputedFields
+	}
+	return nil
+}
+
+func (x *FacetQuery) GetSkip() int64 {
+	if x != nil {
+		return x.Skip
 	}
 	return 0
 }
 
-func (x *Pagination) GetLimit() int32 {
+func (x *FacetQuery) GetLimit() int64 {
 	if x != nil {
 		return x.Limit
 	}
@@ -479,16 +619,14 @@ func (x *Pagination) GetLimit() int32 {
 
 type Request struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Pagination    *Pagination            `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
-	Filters       []*Filter              `protobuf:"bytes,2,rep,name=filters,proto3" json:"filters,omitempty"`
-	Sort          []*Sort                `protobuf:"bytes,3,rep,name=sort,proto3" json:"sort,omitempty"`
+	Facets        []*FacetQuery          `protobuf:"bytes,1,rep,name=facets,proto3" json:"facets,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Request) Reset() {
 	*x = Request{}
-	mi := &file_common_v1_common_proto_msgTypes[4]
+	mi := &file_common_v1_common_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -500,7 +638,7 @@ func (x *Request) String() string {
 func (*Request) ProtoMessage() {}
 
 func (x *Request) ProtoReflect() protoreflect.Message {
-	mi := &file_common_v1_common_proto_msgTypes[4]
+	mi := &file_common_v1_common_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -513,53 +651,38 @@ func (x *Request) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Request.ProtoReflect.Descriptor instead.
 func (*Request) Descriptor() ([]byte, []int) {
-	return file_common_v1_common_proto_rawDescGZIP(), []int{4}
+	return file_common_v1_common_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *Request) GetPagination() *Pagination {
+func (x *Request) GetFacets() []*FacetQuery {
 	if x != nil {
-		return x.Pagination
+		return x.Facets
 	}
 	return nil
 }
 
-func (x *Request) GetFilters() []*Filter {
-	if x != nil {
-		return x.Filters
-	}
-	return nil
-}
-
-func (x *Request) GetSort() []*Sort {
-	if x != nil {
-		return x.Sort
-	}
-	return nil
-}
-
-type Field struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Field         string                 `protobuf:"bytes,1,opt,name=field,proto3" json:"field,omitempty"`
-	Value         string                 `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
+type Result struct {
+	state         protoimpl.MessageState     `protogen:"open.v1"`
+	Data          map[string]*structpb.Value `protobuf:"bytes,1,rep,name=data,proto3" json:"data,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *Field) Reset() {
-	*x = Field{}
-	mi := &file_common_v1_common_proto_msgTypes[5]
+func (x *Result) Reset() {
+	*x = Result{}
+	mi := &file_common_v1_common_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Field) String() string {
+func (x *Result) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Field) ProtoMessage() {}
+func (*Result) ProtoMessage() {}
 
-func (x *Field) ProtoReflect() protoreflect.Message {
-	mi := &file_common_v1_common_proto_msgTypes[5]
+func (x *Result) ProtoReflect() protoreflect.Message {
+	mi := &file_common_v1_common_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -570,84 +693,194 @@ func (x *Field) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Field.ProtoReflect.Descriptor instead.
-func (*Field) Descriptor() ([]byte, []int) {
-	return file_common_v1_common_proto_rawDescGZIP(), []int{5}
+// Deprecated: Use Result.ProtoReflect.Descriptor instead.
+func (*Result) Descriptor() ([]byte, []int) {
+	return file_common_v1_common_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *Field) GetField() string {
+func (x *Result) GetData() map[string]*structpb.Value {
 	if x != nil {
-		return x.Field
+		return x.Data
 	}
-	return ""
+	return nil
 }
 
-func (x *Field) GetValue() string {
+type Summary struct {
+	state         protoimpl.MessageState     `protogen:"open.v1"`
+	Records       map[string]*structpb.Value `protobuf:"bytes,1,rep,name=records,proto3" json:"records,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Summary) Reset() {
+	*x = Summary{}
+	mi := &file_common_v1_common_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Summary) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Summary) ProtoMessage() {}
+
+func (x *Summary) ProtoReflect() protoreflect.Message {
+	mi := &file_common_v1_common_proto_msgTypes[7]
 	if x != nil {
-		return x.Value
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
 	}
-	return ""
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Summary.ProtoReflect.Descriptor instead.
+func (*Summary) Descriptor() ([]byte, []int) {
+	return file_common_v1_common_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *Summary) GetRecords() map[string]*structpb.Value {
+	if x != nil {
+		return x.Records
+	}
+	return nil
+}
+
+type Summaries struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Records       []*Summary             `protobuf:"bytes,1,rep,name=records,proto3" json:"records,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Summaries) Reset() {
+	*x = Summaries{}
+	mi := &file_common_v1_common_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Summaries) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Summaries) ProtoMessage() {}
+
+func (x *Summaries) ProtoReflect() protoreflect.Message {
+	mi := &file_common_v1_common_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Summaries.ProtoReflect.Descriptor instead.
+func (*Summaries) Descriptor() ([]byte, []int) {
+	return file_common_v1_common_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *Summaries) GetRecords() []*Summary {
+	if x != nil {
+		return x.Records
+	}
+	return nil
 }
 
 var File_common_v1_common_proto protoreflect.FileDescriptor
 
 const file_common_v1_common_proto_rawDesc = "" +
 	"\n" +
-	"\x16common/v1/common.proto\x12\tcommon.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\x95\x02\n" +
+	"\x16common/v1/common.proto\x12\tcommon.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/protobuf/struct.proto\"Y\n" +
 	"\x06Filter\x12\x14\n" +
-	"\x05field\x18\x01 \x01(\tR\x05field\x12/\n" +
-	"\boperator\x18\x02 \x01(\x0e2\x13.common.v1.OperatorR\boperator\x12#\n" +
-	"\fstring_value\x18\x03 \x01(\tH\x00R\vstringValue\x12!\n" +
-	"\vint32_value\x18\x04 \x01(\x05H\x00R\n" +
-	"int32Value\x12;\n" +
+	"\x05field\x18\x01 \x01(\tR\x05field\x12#\n" +
+	"\x02op\x18\x02 \x01(\x0e2\x13.common.v1.FilterOpR\x02op\x12\x14\n" +
+	"\x05value\x18\x03 \x01(\tR\x05value\"c\n" +
+	"\vAggregation\x12.\n" +
+	"\x04type\x18\x01 \x01(\x0e2\x1a.common.v1.AggregationTypeR\x04type\x12\x14\n" +
+	"\x05field\x18\x02 \x01(\tR\x05field\x12\x0e\n" +
+	"\x02as\x18\x03 \x01(\tR\x02as\"N\n" +
 	"\n" +
-	"time_value\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampH\x00R\ttimeValue\x126\n" +
-	"\fvalues_value\x18\x06 \x01(\v2\x11.common.v1.ValuesH\x00R\vvaluesValueB\a\n" +
-	"\x05value\" \n" +
-	"\x06Values\x12\x16\n" +
-	"\x06values\x18\x01 \x03(\tR\x06values\"D\n" +
-	"\x04Sort\x12\x14\n" +
-	"\x05field\x18\x01 \x01(\tR\x05field\x12&\n" +
-	"\x05order\x18\x02 \x01(\x0e2\x10.common.v1.OrderR\x05order\"6\n" +
+	"SortOption\x12\x14\n" +
+	"\x05field\x18\x01 \x01(\tR\x05field\x12*\n" +
+	"\x05order\x18\x02 \x01(\x0e2\x14.common.v1.SortOrderR\x05order\"x\n" +
+	"\rComputedField\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x127\n" +
+	"\boperator\x18\x02 \x01(\x0e2\x1b.common.v1.ComputedOperatorR\boperator\x12\x1a\n" +
+	"\boperands\x18\x03 \x03(\tR\boperands\"\xbc\x02\n" +
 	"\n" +
-	"Pagination\x12\x12\n" +
-	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x14\n" +
-	"\x05limit\x18\x02 \x01(\x05R\x05limit\"\x92\x01\n" +
-	"\aRequest\x125\n" +
-	"\n" +
-	"pagination\x18\x01 \x01(\v2\x15.common.v1.PaginationR\n" +
-	"pagination\x12+\n" +
-	"\afilters\x18\x02 \x03(\v2\x11.common.v1.FilterR\afilters\x12#\n" +
-	"\x04sort\x18\x03 \x03(\v2\x0f.common.v1.SortR\x04sort\"3\n" +
-	"\x05Field\x12\x14\n" +
-	"\x05field\x18\x01 \x01(\tR\x05field\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value*\xd7\x01\n" +
-	"\bOperator\x12\x12\n" +
-	"\x0eUNKNOWN_FILTER\x10\x00\x12\t\n" +
-	"\x05EQUAL\x10\x01\x12\b\n" +
-	"\x04LIKE\x10\x02\x12\v\n" +
-	"\aBETWEEN\x10\x03\x12\x10\n" +
-	"\fGREATER_THAN\x10\x04\x12\r\n" +
-	"\tLESS_THAN\x10\x05\x12\x16\n" +
-	"\x12GREATER_THAN_EQUAL\x10\x06\x12\x13\n" +
-	"\x0fLESS_THAN_EQUAL\x10\a\x12\x0e\n" +
-	"\n" +
-	"DIFFERENCE\x10\b\x12\x0e\n" +
-	"\n" +
-	"DATE_EQUAL\x10\t\x12\n" +
-	"\n" +
-	"\x06BEFORE\x10\n" +
-	"\x12\t\n" +
-	"\x05AFTER\x10\v\x12\x10\n" +
-	"\fDATE_BETWEEN\x10\f*/\n" +
-	"\aLogical\x12\x13\n" +
-	"\x0fUNKNOWN_LOGICAL\x10\x00\x12\a\n" +
-	"\x03AND\x10\x01\x12\x06\n" +
-	"\x02OR\x10\x02*-\n" +
-	"\x05Order\x12\x11\n" +
-	"\rUNKNOWN_ORDER\x10\x00\x12\a\n" +
+	"FacetQuery\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12+\n" +
+	"\afilters\x18\x02 \x03(\v2\x11.common.v1.FilterR\afilters\x12\x19\n" +
+	"\bgroup_by\x18\x03 \x03(\tR\agroupBy\x12:\n" +
+	"\faggregations\x18\x04 \x03(\v2\x16.common.v1.AggregationR\faggregations\x12)\n" +
+	"\x04sort\x18\x05 \x03(\v2\x15.common.v1.SortOptionR\x04sort\x12A\n" +
+	"\x0fcomputed_fields\x18\x06 \x03(\v2\x18.common.v1.ComputedFieldR\x0ecomputedFields\x12\x12\n" +
+	"\x04skip\x18\a \x01(\x03R\x04skip\x12\x14\n" +
+	"\x05limit\x18\b \x01(\x03R\x05limit\"8\n" +
+	"\aRequest\x12-\n" +
+	"\x06facets\x18\x01 \x03(\v2\x15.common.v1.FacetQueryR\x06facets\"\x8a\x01\n" +
+	"\x06Result\x12/\n" +
+	"\x04data\x18\x01 \x03(\v2\x1b.common.v1.Result.DataEntryR\x04data\x1aO\n" +
+	"\tDataEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12,\n" +
+	"\x05value\x18\x02 \x01(\v2\x16.google.protobuf.ValueR\x05value:\x028\x01\"\x98\x01\n" +
+	"\aSummary\x129\n" +
+	"\arecords\x18\x01 \x03(\v2\x1f.common.v1.Summary.RecordsEntryR\arecords\x1aR\n" +
+	"\fRecordsEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12,\n" +
+	"\x05value\x18\x02 \x01(\v2\x16.google.protobuf.ValueR\x05value:\x028\x01\"9\n" +
+	"\tSummaries\x12,\n" +
+	"\arecords\x18\x01 \x03(\v2\x12.common.v1.SummaryR\arecords*l\n" +
+	"\bFilterOp\x12\x12\n" +
+	"\x0eOP_UNSPECIFIED\x10\x00\x12\x06\n" +
+	"\x02EQ\x10\x01\x12\x06\n" +
+	"\x02NE\x10\x02\x12\x06\n" +
+	"\x02GT\x10\x03\x12\a\n" +
+	"\x03GTE\x10\x04\x12\x06\n" +
+	"\x02LT\x10\x05\x12\a\n" +
+	"\x03LTE\x10\x06\x12\x06\n" +
+	"\x02IN\x10\a\x12\a\n" +
+	"\x03NIN\x10\b\x12\t\n" +
+	"\x05REGEX\x10\t*U\n" +
+	"\x0fAggregationType\x12\x13\n" +
+	"\x0fAGG_UNSPECIFIED\x10\x00\x12\a\n" +
+	"\x03SUM\x10\x01\x12\a\n" +
+	"\x03AVG\x10\x02\x12\t\n" +
+	"\x05COUNT\x10\x03\x12\a\n" +
+	"\x03MIN\x10\x04\x12\a\n" +
+	"\x03MAX\x10\x05*4\n" +
+	"\tSortOrder\x12\x14\n" +
+	"\x10SORT_UNSPECIFIED\x10\x00\x12\a\n" +
 	"\x03ASC\x10\x01\x12\b\n" +
-	"\x04DESC\x10\x02B\xb8\x01\n" +
+	"\x04DESC\x10\x02*\xda\x01\n" +
+	"\x10ComputedOperator\x12\x13\n" +
+	"\x0fOCP_UNSPECIFIED\x10\x00\x12\f\n" +
+	"\bMULTIPLY\x10\x01\x12\a\n" +
+	"\x03ADD\x10\x02\x12\n" +
+	"\n" +
+	"\x06DIVIDE\x10\x03\x12\f\n" +
+	"\bSUBTRACT\x10\x04\x12\b\n" +
+	"\x04WEEK\x10\x05\x12\b\n" +
+	"\x04YEAR\x10\x06\x12\t\n" +
+	"\x05MONTH\x10\a\x12\x10\n" +
+	"\fDAY_OF_MONTH\x10\b\x12\f\n" +
+	"\bTO_UPPER\x10\t\x12\f\n" +
+	"\bTO_LOWER\x10\n" +
+	"\x12\n" +
+	"\n" +
+	"\x06CONCAT\x10\v\x12\n" +
+	"\n" +
+	"\x06SUBSTR\x10\f\x12\x0e\n" +
+	"\n" +
+	"DATE_TRUNC\x10\r\x12\v\n" +
+	"\aIF_NULL\x10\x0eB\xb8\x01\n" +
 	"\rcom.common.v1B\vCommonProtoP\x01ZUgithub.com/moriba-cloud/ose-postman/internal/interface/grpc/gen/go/common/v1;commonv1\xa2\x02\x03CXX\xaa\x02\tCommon.V1\xca\x02\tCommon\\V1\xe2\x02\x15Common\\V1\\GPBMetadata\xea\x02\n" +
 	"Common::V1b\x06proto3"
 
@@ -663,33 +896,46 @@ func file_common_v1_common_proto_rawDescGZIP() []byte {
 	return file_common_v1_common_proto_rawDescData
 }
 
-var file_common_v1_common_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
-var file_common_v1_common_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_common_v1_common_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
+var file_common_v1_common_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_common_v1_common_proto_goTypes = []any{
-	(Operator)(0),                 // 0: common.v1.Operator
-	(Logical)(0),                  // 1: common.v1.Logical
-	(Order)(0),                    // 2: common.v1.Order
-	(*Filter)(nil),                // 3: common.v1.Filter
-	(*Values)(nil),                // 4: common.v1.Values
-	(*Sort)(nil),                  // 5: common.v1.Sort
-	(*Pagination)(nil),            // 6: common.v1.Pagination
-	(*Request)(nil),               // 7: common.v1.Request
-	(*Field)(nil),                 // 8: common.v1.Field
-	(*timestamppb.Timestamp)(nil), // 9: google.protobuf.Timestamp
+	(FilterOp)(0),          // 0: common.v1.FilterOp
+	(AggregationType)(0),   // 1: common.v1.AggregationType
+	(SortOrder)(0),         // 2: common.v1.SortOrder
+	(ComputedOperator)(0),  // 3: common.v1.ComputedOperator
+	(*Filter)(nil),         // 4: common.v1.Filter
+	(*Aggregation)(nil),    // 5: common.v1.Aggregation
+	(*SortOption)(nil),     // 6: common.v1.SortOption
+	(*ComputedField)(nil),  // 7: common.v1.ComputedField
+	(*FacetQuery)(nil),     // 8: common.v1.FacetQuery
+	(*Request)(nil),        // 9: common.v1.Request
+	(*Result)(nil),         // 10: common.v1.Result
+	(*Summary)(nil),        // 11: common.v1.Summary
+	(*Summaries)(nil),      // 12: common.v1.Summaries
+	nil,                    // 13: common.v1.Result.DataEntry
+	nil,                    // 14: common.v1.Summary.RecordsEntry
+	(*structpb.Value)(nil), // 15: google.protobuf.Value
 }
 var file_common_v1_common_proto_depIdxs = []int32{
-	0, // 0: common.v1.Filter.operator:type_name -> common.v1.Operator
-	9, // 1: common.v1.Filter.time_value:type_name -> google.protobuf.Timestamp
-	4, // 2: common.v1.Filter.values_value:type_name -> common.v1.Values
-	2, // 3: common.v1.Sort.order:type_name -> common.v1.Order
-	6, // 4: common.v1.Request.pagination:type_name -> common.v1.Pagination
-	3, // 5: common.v1.Request.filters:type_name -> common.v1.Filter
-	5, // 6: common.v1.Request.sort:type_name -> common.v1.Sort
-	7, // [7:7] is the sub-list for method output_type
-	7, // [7:7] is the sub-list for method input_type
-	7, // [7:7] is the sub-list for extension type_name
-	7, // [7:7] is the sub-list for extension extendee
-	0, // [0:7] is the sub-list for field type_name
+	0,  // 0: common.v1.Filter.op:type_name -> common.v1.FilterOp
+	1,  // 1: common.v1.Aggregation.type:type_name -> common.v1.AggregationType
+	2,  // 2: common.v1.SortOption.order:type_name -> common.v1.SortOrder
+	3,  // 3: common.v1.ComputedField.operator:type_name -> common.v1.ComputedOperator
+	4,  // 4: common.v1.FacetQuery.filters:type_name -> common.v1.Filter
+	5,  // 5: common.v1.FacetQuery.aggregations:type_name -> common.v1.Aggregation
+	6,  // 6: common.v1.FacetQuery.sort:type_name -> common.v1.SortOption
+	7,  // 7: common.v1.FacetQuery.computed_fields:type_name -> common.v1.ComputedField
+	8,  // 8: common.v1.Request.facets:type_name -> common.v1.FacetQuery
+	13, // 9: common.v1.Result.data:type_name -> common.v1.Result.DataEntry
+	14, // 10: common.v1.Summary.records:type_name -> common.v1.Summary.RecordsEntry
+	11, // 11: common.v1.Summaries.records:type_name -> common.v1.Summary
+	15, // 12: common.v1.Result.DataEntry.value:type_name -> google.protobuf.Value
+	15, // 13: common.v1.Summary.RecordsEntry.value:type_name -> google.protobuf.Value
+	14, // [14:14] is the sub-list for method output_type
+	14, // [14:14] is the sub-list for method input_type
+	14, // [14:14] is the sub-list for extension type_name
+	14, // [14:14] is the sub-list for extension extendee
+	0,  // [0:14] is the sub-list for field type_name
 }
 
 func init() { file_common_v1_common_proto_init() }
@@ -697,19 +943,13 @@ func file_common_v1_common_proto_init() {
 	if File_common_v1_common_proto != nil {
 		return
 	}
-	file_common_v1_common_proto_msgTypes[0].OneofWrappers = []any{
-		(*Filter_StringValue)(nil),
-		(*Filter_Int32Value)(nil),
-		(*Filter_TimeValue)(nil),
-		(*Filter_ValuesValue)(nil),
-	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_common_v1_common_proto_rawDesc), len(file_common_v1_common_proto_rawDesc)),
-			NumEnums:      3,
-			NumMessages:   6,
+			NumEnums:      4,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

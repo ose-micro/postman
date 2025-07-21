@@ -12,14 +12,14 @@ import (
 )
 
 type Repository struct {
-	Template templateDomain.Repository
-	Email    emailDomain.Repository
+	Template templateDomain.Write
+	Email    emailDomain.Write
 }
 
 func InjectRepository(db *postgres.Postgres, bs domain.Domain, log logger.Logger, tracer tracing.Tracer) Repository {
 	return Repository{
-		Template: template.NewTemplateRepository(db, bs, log, tracer),
-		Email:    email.NewEmailRepository(db, bs, log, tracer),
+		Template: template.NewRepository(db, bs, log, tracer),
+		Email:    email.NewRepository(db, bs, log, tracer),
 	}
 }
 

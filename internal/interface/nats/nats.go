@@ -5,13 +5,14 @@ import (
 	"fmt"
 
 	"github.com/moriba-cloud/ose-postman/internal/app"
+	"github.com/moriba-cloud/ose-postman/internal/events"
 	"github.com/ose-micro/core/logger"
 	"github.com/ose-micro/cqrs/bus"
 )
 
-func InvokeConsumers(events app.Events, log logger.Logger, bus bus.Bus) {
+func InvokeConsumers(events events.Events, app app.Apps, log logger.Logger, bus bus.Bus) {
 	newTemplateConsumer(events.Template, bus)
-	newEmailConsumer(events.Email, bus)
+	newEmailConsumer(events.Email, app.Email, bus)
 }
 
 func toByte(data interface{}) ([]byte, error) {

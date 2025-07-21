@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/moriba-cloud/ose-postman/internal/domain/email"
-	"github.com/ose-micro/core/dto"
 	"github.com/ose-micro/core/logger"
 	"github.com/ose-micro/core/tracing"
 	"github.com/ose-micro/cqrs"
@@ -15,26 +14,14 @@ import (
 	"go.uber.org/zap"
 )
 
-type ReadQuery struct {
-	request dto.Request
-}
-
-// QueryName implements cqrs.Query.
-func (r ReadQuery) QueryName() string {
-	return email.READ_QUERY
-}
-
-var _ cqrs.Query = ReadQuery{}
-
-// Handler
 type readQueryHandler struct {
-	repo   email.Repository
+	repo   email.Read
 	log    logger.Logger
 	tracer tracing.Tracer
 }
 
 // Handle implements cqrs.QueryHandle.
-func (r *readQueryHandler) Handle(ctx context.Context, query ReadQuery) ([]email.Domain, error) {
+func (r *readQueryHandler) Handle(ctx context.Context, query email.ReadQuery) (map[string]any, error) {
 	ctx, span := r.tracer.Start(ctx, "app.email.read.query.handler", trace.WithAttributes(
 		attribute.String("operation", "READ"),
 		attribute.String("payload", fmt.Sprintf("%v", query)),
@@ -43,12 +30,12 @@ func (r *readQueryHandler) Handle(ctx context.Context, query ReadQuery) ([]email
 
 	traceId := trace.SpanContextFromContext(ctx).TraceID().String()
 
-	// fetch emails from store
-	records, err := r.repo.Read(ctx, query.request)
+	// fetch roles from store
+	records, err := r.repo.Read(ctx, query.Request)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
-		r.log.Error("failed to read emails",
+		r.log.Error("failed to read roles",
 			zap.String("trace_id", traceId),
 			zap.String("operation", "READ"),
 			zap.Error(err),
@@ -65,8 +52,8 @@ func (r *readQueryHandler) Handle(ctx context.Context, query ReadQuery) ([]email
 	return records, nil
 }
 
-func newReadQueryHandler(repo email.Repository, log logger.Logger,
-	tracer tracing.Tracer) cqrs.QueryHandle[ReadQuery, []email.Domain] {
+func newReadQueryHandler(repo email.Read, log logger.Logger,
+	tracer tracing.Tracer) cqrs.QueryHandle[email.ReadQuery, map[string]any] {
 	return &readQueryHandler{
 		repo: repo,
 		log: log,

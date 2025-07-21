@@ -3,7 +3,6 @@ package email
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/moriba-cloud/ose-postman/internal/domain"
 	"github.com/moriba-cloud/ose-postman/internal/domain/email"
@@ -16,35 +15,14 @@ import (
 	"go.uber.org/zap"
 )
 
-type CreatedEvent struct {
-	Id        string                 `json:"id"`
-	Recipient string                 `json:"recipient"`
-	Sender    *string                `json:"sender"`
-	Subject   string                 `json:"subject"`
-	Data      map[string]interface{} `json:"data"`
-	Template  string                 `json:"template"`
-	From      string                 `json:"from"`
-	Message   string                 `json:"message"`
-	State     email.State            `json:"state"`
-	CreatedAt time.Time              `json:"createdAt"`
-	UpdatedAt time.Time              `json:"updatedAt"`
-}
-
-// EventName implements cqrs.Event.
-func (c CreatedEvent) EventName() string {
-	return "email.created.event"
-}
-
-var _ cqrs.Event = CreatedEvent{}
-
-type createdEvent struct {
-	repo   email.Repository
+type updatedEventHandler struct {
+	repo   email.Read
 	log    logger.Logger
 	tracer tracing.Tracer
 	bs     domain.Domain
 }
 
-func (c *createdEvent) ToDomain(event CreatedEvent) (email.Domain, error) {
+func (c *updatedEventHandler) ToDomain(event email.DomainEvent) (email.Domain, error) {
 	record, err := c.bs.Email.Existing(email.Params{
 		Id:        event.Id,
 		Recipient: event.Recipient,
@@ -67,9 +45,9 @@ func (c *createdEvent) ToDomain(event CreatedEvent) (email.Domain, error) {
 }
 
 // Handle implements cqrs.EventHandle.
-func (c *createdEvent) Handle(ctx context.Context, event CreatedEvent) error {
+func (c *updatedEventHandler) Handle(ctx context.Context, event email.DomainEvent) error {
 	ctx, span := c.tracer.Start(ctx, "app.email.created.event.handler", trace.WithAttributes(
-		attribute.String("operation", "CREATED"),
+		attribute.String("operation", "UPDATED_EVENT"),
 		attribute.String("payload", fmt.Sprintf("%v", event)),
 	))
 	defer span.End()
@@ -83,21 +61,21 @@ func (c *createdEvent) Handle(ctx context.Context, event CreatedEvent) error {
 		span.SetStatus(codes.Error, err.Error())
 		c.log.Error("fail to cast to domain",
 			zap.String("trace_id", traceId),
-			zap.String("stage", "app.handler"),
-			zap.Any("details", err),
+			zap.String("operation", "UPDATED_EVENT"),
+			zap.Error(err),
 		)
 
 		return err
 	}
 
 	// save to db
-	if err := c.repo.Create(ctx, payload); err != nil {
+	if err := c.repo.Update(ctx, payload); err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
 		c.log.Error("failed to save to db",
 			zap.String("trace_id", traceId),
-			zap.String("stage", "app.handler"),
-			zap.Any("details", err),
+			zap.String("operation", "UPDATED_EVENT"),
+			zap.Error(err),
 		)
 
 		return err
@@ -105,15 +83,15 @@ func (c *createdEvent) Handle(ctx context.Context, event CreatedEvent) error {
 
 	c.log.Info("created process complete successfully",
 		zap.String("trace_id", traceId),
-		zap.String("operation", "CREATED"),
+		zap.String("operation", "UPDATED_EVENT"),
 		zap.Any("payload", event),
 	)
 	return nil
 }
 
-func newCreatedEvent(bs domain.Domain, repo email.Repository, log logger.Logger,
-	tracer tracing.Tracer) cqrs.EventHandle[CreatedEvent] {
-	return &createdEvent{
+func newUpdatedEvent(bs domain.Domain, repo email.Read, log logger.Logger,
+	tracer tracing.Tracer) cqrs.EventHandle[email.DomainEvent] {
+	return &updatedEventHandler{
 		repo:   repo,
 		log:    log,
 		tracer: tracer,

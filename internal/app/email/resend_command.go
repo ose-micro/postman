@@ -3,7 +3,6 @@ package email
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/moriba-cloud/ose-postman/internal/domain"
 	"github.com/moriba-cloud/ose-postman/internal/domain/email"
@@ -19,35 +18,9 @@ import (
 	"go.uber.org/zap"
 )
 
-type ResendCommand struct {
-	Id string
-}
-
-// CommandName implements cqrs.Command.
-func (r ResendCommand) CommandName() string {
-	return email.UPDATED_COMMAND
-}
-
-// Validate implements cqrs.Command.
-func (r ResendCommand) Validate() error {
-	fields := make([]string, 0)
-
-	if r.Id == "" {
-		fields = append(fields, "id is required")
-	}
-
-	if len(fields) > 0 {
-		return fmt.Errorf("%s", strings.Join(fields, ", "))
-	}
-
-	return nil
-}
-
-var _ cqrs.Command = CreateCommand{}
-
 // Handler
 type resendCommandHandler struct {
-	repo   email.Repository
+	repo   email.Write
 	log    logger.Logger
 	bus    bus.Bus
 	mailer *mailer.Mailer
@@ -56,7 +29,7 @@ type resendCommandHandler struct {
 }
 
 // Handle implements cqrs.CommandHandle.
-func (u *resendCommandHandler) Handle(ctx context.Context, command ResendCommand) (email.Domain, error) {
+func (u *resendCommandHandler) Handle(ctx context.Context, command email.IdCommand) (email.Domain, error) {
 	ctx, span := u.tracer.Start(ctx, "app.email.resend_mail.command.handler", trace.WithAttributes(
 		attribute.String("operation", "RESEND_MAIL"),
 		attribute.String("payload", fmt.Sprintf("%v", command)),
@@ -79,10 +52,14 @@ func (u *resendCommandHandler) Handle(ctx context.Context, command ResendCommand
 		return email.Domain{}, err
 	}
 
-	record, err := u.repo.ReadOne(ctx, dto.Filter{
-		Field:    "id",
-		Operator: dto.EQUAL,
-		Value:    command.Id,
+	record, err := u.repo.Read(ctx, dto.Query{
+		Filters: []dto.Filter{
+			{
+				Field: "id",
+				Op:    dto.OpEq,
+				Value: command.Id,
+			},
+		},
 	})
 	if err != nil {
 		span.RecordError(err)
@@ -110,7 +87,7 @@ func (u *resendCommandHandler) Handle(ctx context.Context, command ResendCommand
 	}
 
 	err = u.mailer.Send(ctx, mailer.Params{
-		Sender:    *record.GetSender(),
+		Sender:    record.GetSender(),
 		Recipient: record.GetRecipient(),
 		Subject:   record.GetSubject(),
 		Message:   record.GetMessage(),
@@ -147,7 +124,7 @@ func (u *resendCommandHandler) Handle(ctx context.Context, command ResendCommand
 	}
 
 	// publish bus
-	err = u.bus.Publish(command.CommandName(), UpdatedEvent(record.MakePublic()))
+	err = u.bus.Publish(command.CommandName(), email.DomainEvent(record.MakePublic()))
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
@@ -168,8 +145,8 @@ func (u *resendCommandHandler) Handle(ctx context.Context, command ResendCommand
 	return *record, nil
 }
 
-func newResendCommandHandler(bs domain.Domain, repo email.Repository, log logger.Logger,
-	tracer tracing.Tracer, bus bus.Bus, mailer *mailer.Mailer) cqrs.CommandHandle[ResendCommand, email.Domain] {
+func newResendCommandHandler(bs domain.Domain, repo email.Write, log logger.Logger,
+	tracer tracing.Tracer, bus bus.Bus, mailer *mailer.Mailer) cqrs.CommandHandle[email.IdCommand, email.Domain] {
 	return &resendCommandHandler{
 		repo:   repo,
 		log:    log,

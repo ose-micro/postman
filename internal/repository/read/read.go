@@ -12,13 +12,13 @@ import (
 )
 
 type Repository struct {
-	Template templateDomain.Repository
-	Email    emailDomain.Repository
+	Template templateDomain.Read
+	Email    emailDomain.Read
 }
 
 func InjectRepository(db *mongodb.Client, bs domain.Domain, log logger.Logger, tracer tracing.Tracer) Repository {
 	return Repository{
-		Template: template.NewTemplateRepository(db, log, tracer, bs),
-		Email:    email.NewEmailRepository(bs, db, log, tracer),
+		Template: template.NewRepository(db, log, tracer, bs),
+		Email:    email.NewRepository(db, log, tracer, bs),
 	}
 }

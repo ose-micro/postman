@@ -19,7 +19,7 @@ import (
 
 // Handler
 type deleteCommandHandler struct {
-	repo   template.Repository
+	repo   template.Write
 	log    logger.Logger
 	bus    bus.Bus
 	tracer tracing.Tracer
@@ -49,10 +49,14 @@ func (d *deleteCommandHandler) Handle(ctx context.Context, command template.Dele
 		return template.Domain{}, err
 	}
 
-	record, err := d.repo.ReadOne(ctx, dto.Filter{
-		Field:    "id",
-		Operator: dto.EQUAL,
-		Value:    command.Id,
+	record, err := d.repo.Read(ctx, dto.Query{
+		Filters: []dto.Filter{
+			{
+				Field: "id",
+				Op:    dto.OpEq,
+				Value: command.Id,
+			},
+		},
 	})
 	if err != nil {
 		span.RecordError(err)
@@ -81,7 +85,7 @@ func (d *deleteCommandHandler) Handle(ctx context.Context, command template.Dele
 	}
 
 	// publish bus
-	err = d.bus.Publish(command.CommandName(), template.DefaultEvent(record.MakePublic()))
+	err = d.bus.Publish(command.CommandName(), template.DomainEvent(record.MakePublic()))
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
@@ -102,7 +106,7 @@ func (d *deleteCommandHandler) Handle(ctx context.Context, command template.Dele
 	return template.Domain{}, nil
 }
 
-func newDeleteCommandHandler(bs domain.Domain, repo template.Repository, log logger.Logger,
+func newDeleteCommandHandler(bs domain.Domain, repo template.Write, log logger.Logger,
 	tracer tracing.Tracer, bus bus.Bus) cqrs.CommandHandle[template.DeleteCommand, template.Domain] {
 	return &deleteCommandHandler{
 		repo:   repo,

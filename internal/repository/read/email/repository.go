@@ -2,7 +2,6 @@ package email
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/moriba-cloud/ose-postman/internal/domain"
@@ -13,8 +12,6 @@ import (
 	mongodb "github.com/ose-micro/mongo"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
@@ -29,8 +26,8 @@ type emailRepository struct {
 }
 
 // Create implements email.Repository.
-func (e *emailRepository) Create(ctx context.Context, payload email.Domain) error {
-	ctx, span := e.tracer.Start(ctx, "read.repository.email.create", trace.WithAttributes(
+func (c *emailRepository) Create(ctx context.Context, payload email.Domain) error {
+	ctx, span := c.tracer.Start(ctx, "read.repository.email.create", trace.WithAttributes(
 		attribute.String("operation", "CREATE"),
 		attribute.String("payload", fmt.Sprintf("%v", payload.MakePublic())),
 	))
@@ -39,10 +36,10 @@ func (e *emailRepository) Create(ctx context.Context, payload email.Domain) erro
 	traceId := trace.SpanContextFromContext(ctx).TraceID().String()
 
 	record := newCollection(payload)
-	if _, err := e.collection.InsertOne(ctx, record); err != nil {
+	if _, err := c.collection.InsertOne(ctx, record); err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
-		e.log.Error("failed to create in mongo",
+		c.log.Error("failed to create in mongo",
 			zap.String("trace_id", traceId),
 			zap.String("operation", "CREATE"),
 			zap.Error(err),
@@ -50,7 +47,7 @@ func (e *emailRepository) Create(ctx context.Context, payload email.Domain) erro
 		return err
 	}
 
-	e.log.Info("create process complete successfully",
+	c.log.Info("create process complete successfully",
 		zap.String("operation", "CREATE"),
 		zap.String("trace_id", traceId),
 		zap.Any("payload", payload.MakePublic()),
@@ -59,8 +56,8 @@ func (e *emailRepository) Create(ctx context.Context, payload email.Domain) erro
 }
 
 // Delete implements email.Repository.
-func (e *emailRepository) Delete(ctx context.Context, payload email.Domain) error {
-	ctx, span := e.tracer.Start(ctx, "read.repository.email.delete", trace.WithAttributes(
+func (c *emailRepository) Delete(ctx context.Context, payload email.Domain) error {
+	ctx, span := c.tracer.Start(ctx, "read.repository.email.delete", trace.WithAttributes(
 		attribute.String("operation", "DELETE"),
 		attribute.String("payload", fmt.Sprintf("%+v", payload.MakePublic())),
 	))
@@ -69,11 +66,11 @@ func (e *emailRepository) Delete(ctx context.Context, payload email.Domain) erro
 	traceID := trace.SpanContextFromContext(ctx).TraceID().String()
 
 	filter := bson.M{"_id": payload.GetID()}
-	if _, err := e.collection.DeleteOne(ctx, filter); err != nil {
+	if _, err := c.collection.DeleteOne(ctx, filter); err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
 
-		e.log.Error("failed to delete in mongo",
+		c.log.Error("failed to delete in mongo",
 			zap.String("operation", "DELETE"),
 			zap.String("trace_id", traceID),
 			zap.Error(err),
@@ -81,7 +78,7 @@ func (e *emailRepository) Delete(ctx context.Context, payload email.Domain) erro
 		return err
 	}
 
-	e.log.Info("delete process completed successfully",
+	c.log.Info("delete process completed successfully",
 		zap.String("operation", "DELETE"),
 		zap.String("trace_id", traceID),
 		zap.Any("payload", payload.MakePublic()),
@@ -91,146 +88,60 @@ func (e *emailRepository) Delete(ctx context.Context, payload email.Domain) erro
 }
 
 // Read implements email.Repository.
-func (e *emailRepository) Read(ctx context.Context, request dto.Request) ([]email.Domain, error) {
-	ctx, span := e.tracer.Start(ctx, "read.repository.email.read", trace.WithAttributes(
+func (c *emailRepository) Read(ctx context.Context, request dto.Request) (map[string]any, error) {
+	ctx, span := c.tracer.Start(ctx, "read.repository.email.read", trace.WithAttributes(
 		attribute.String("operation", "READ"),
 		attribute.String("payload", fmt.Sprintf("%+v", request)),
 	))
 	defer span.End()
 
 	traceID := trace.SpanContextFromContext(ctx).TraceID().String()
+	mongodb.RegisterType("email", email.Public{})
+	typeHints := map[string]string{}
 
-	filters := mongodb.BuildFilter(request.Filter)
-
-	findOpts := options.Find()
-
-	if len(request.Sort) > 0 {
-		sorts := make([]mongodb.Sort, 0)
-		for _, s := range request.Sort {
-			sorts = append(sorts, mongodb.Sort{
-				Field:     s.Field,
-				Direction: mongodb.Direction(s.Value),
-			})
-		}
-
-		sort := mongodb.BuildSort(sorts...)
-		sort(findOpts)
+	for _, v := range request.Queries {
+		typeHints[v.Name] = "email"
 	}
 
-	if request.Pagination != nil {
-		limitValue := int64(request.Pagination.Limit)
-		limit := mongodb.WithLimit(limitValue)
-
-		skipValue := int64(request.Pagination.Page)
-		skip := mongodb.WithSkip(skipValue)
-
-		limit(findOpts)
-		skip(findOpts)
-	}
-
-	cursor, err := e.collection.Find(ctx, filters, findOpts)
+	res, err := mongodb.RunFaceted(ctx, c.collection, request)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
-		e.log.Error("Failed to fetch email by request",
+
+		c.log.Error("Failed to fetch role by request",
 			zap.String("operation", "READ"),
 			zap.String("trace_id", traceID),
+			zap.Any("payload", request),
 			zap.Error(err),
 		)
 		return nil, err
 	}
 
-	defer cursor.Close(ctx)
-
-	var records []email.Domain
-	for cursor.Next(ctx) {
-		var collection Email
-		if err := cursor.Decode(&collection); err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, err.Error())
-			e.log.Error("failed to cast to collection",
-				zap.String("operation", "READ"),
-				zap.String("trace_id", traceID),
-				zap.Error(err),
-			)
-			return nil, err
-		}
-
-		record, err := e.toDomain(collection)
-		if err != nil {
-			span.RecordError(err)
-			e.log.Error("failed to cast to domain",
-				zap.String("trace_id", traceID),
-				zap.String("operation", "READ"),
-				zap.Error(err),
-			)
-			return nil, err
-		}
-		records = append(records, *record)
-	}
-
-	e.log.Info("read process complete successfully",
+	c.log.Info("Read process completed successfully",
 		zap.String("operation", "READ"),
 		zap.String("trace_id", traceID),
-		zap.Any("payload", fmt.Sprintf("%+v", request)),
+		zap.Any("payload", request),
 	)
+
+	records, err := mongodb.CastFacetedResult(res, typeHints)
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		c.log.Error("Failed to cast faceted result",
+			zap.String("operation", "READ"),
+			zap.String("trace_id", traceID),
+			zap.Any("payload", request),
+			zap.Error(err),
+		)
+		return nil, err
+	}
+
 	return records, nil
 }
 
-// ReadOne implements email.Repository.
-func (e *emailRepository) ReadOne(ctx context.Context, filters ...dto.Filter) (*email.Domain, error) {
-	ctx, span := e.tracer.Start(ctx, "repository.read.email.read_one", trace.WithAttributes(
-		attribute.String("operation", "READ_ONE"),
-		attribute.String("payload", fmt.Sprintf("%+v", filters)),
-	))
-	defer span.End()
-	traceID := trace.SpanContextFromContext(ctx).TraceID().String()
-
-	filter := mongodb.BuildFilter(filters)
-
-	var collection Email
-
-	err := e.collection.FindOne(ctx, filter).
-		Decode(&collection)
-
-	if err != nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, err.Error())
-		e.log.Error("failed to find email",
-			zap.String("operation", "READ_ONE"),
-			zap.String("trace_id", traceID),
-			zap.Error(err),
-		)
-	}
-
-	if errors.Is(err, mongo.ErrNoDocuments) {
-		return nil, fmt.Errorf("no document with this given filters")
-	} else if err != nil {
-		return nil, err
-	}
-
-	record, err := e.toDomain(collection)
-	if err != nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, err.Error())
-		e.log.Error("failed to cast to domain",
-			zap.String("operation", "READ_ONE"),
-			zap.String("trace_id", traceID),
-			zap.Error(err),
-		)
-	}
-
-	e.log.Info("read_one process complete successfully",
-		zap.String("operation", "READ_ONE"),
-		zap.String("trace_id", traceID),
-		zap.Any("payload", filters),
-	)
-	return record, err
-}
-
 // Update implements email.Repository.
-func (e *emailRepository) Update(ctx context.Context, payload email.Domain) error {
-	ctx, span := e.tracer.Start(ctx, "repository.read.email.update", trace.WithAttributes(
+func (c *emailRepository) Update(ctx context.Context, payload email.Domain) error {
+	ctx, span := c.tracer.Start(ctx, "repository.read.email.update", trace.WithAttributes(
 		attribute.String("operation", "UPDATE"),
 		attribute.String("payload", fmt.Sprintf("%+v", payload.MakePublic())),
 	))
@@ -241,13 +152,13 @@ func (e *emailRepository) Update(ctx context.Context, payload email.Domain) erro
 	collection := newCollection(payload)
 	filter := bson.M{"_id": payload.GetID()}
 
-	if _, err := e.collection.UpdateOne(ctx, filter, bson.M{
+	if _, err := c.collection.UpdateOne(ctx, filter, bson.M{
 		"$set": collection,
 	}); err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
 
-		e.log.Error("failed to update email",
+		c.log.Error("failed to update email",
 			zap.String("operation", "UPDATE"),
 			zap.String("trace_id", traceID),
 			zap.Error(err),
@@ -255,7 +166,7 @@ func (e *emailRepository) Update(ctx context.Context, payload email.Domain) erro
 		return err
 	}
 
-	e.log.Info("update process complete successfully",
+	c.log.Info("update process complete successfully",
 		zap.String("operation", "UPDATE"),
 		zap.String("trace_id", traceID),
 		zap.Any("payload", payload.MakePublic()),
@@ -264,28 +175,7 @@ func (e *emailRepository) Update(ctx context.Context, payload email.Domain) erro
 	return nil
 }
 
-func (e *emailRepository) toDomain(collection Email) (*email.Domain, error) {
-	return e.bs.Email.Existing(email.Params{
-		Id:        collection.Id,
-		Recipient: collection.Recipient,
-		Sender:    collection.Sender,
-		Subject:   collection.Subject,
-		Data: func() map[string]interface{} {
-			if data, ok := collection.Data.(map[string]interface{}); ok {
-				return data
-			}
-			return nil
-		}(),
-		Template:  collection.Template,
-		From:      collection.From,
-		Message:   collection.Message,
-		State:     collection.State,
-		CreatedAt: collection.CreatedAt,
-		UpdatedAt: collection.UpdatedAt,
-	})
-}
-
-func NewEmailRepository(bs domain.Domain, db *mongodb.Client, log logger.Logger, tracer tracing.Tracer) email.Repository {
+func NewRepository(db *mongodb.Client, log logger.Logger, tracer tracing.Tracer, bs domain.Domain) email.Read {
 	return &emailRepository{
 		log:        log,
 		tracer:     tracer,

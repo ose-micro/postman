@@ -12,13 +12,14 @@ import (
 func newTemplateConsumer(handler template.Event, bus bus.Bus) {
 	// Created Event
 	bus.Subscribe(template.CREATED_COMMAND,
+		"",
 		func(ctx context.Context, data any) error {
-			var event template.DefaultEvent
+			var event template.DomainEvent
 			raw, err := toByte(data)
 			if err != nil {
 				return err
 			}
-			
+
 			if err := json.Unmarshal(raw, &event); err != nil {
 				return fmt.Errorf("failed to unmarshal into DefaultEvent: %w", err)
 			}
@@ -27,13 +28,14 @@ func newTemplateConsumer(handler template.Event, bus bus.Bus) {
 
 	// Updated Event
 	bus.Subscribe(template.UPDATED_COMMAND,
+		template.QUEUE,
 		func(ctx context.Context, data any) error {
-			var event template.DefaultEvent
+			var event template.DomainEvent
 			raw, err := toByte(data)
 			if err != nil {
 				return err
 			}
-			
+
 			if err := json.Unmarshal(raw, &event); err != nil {
 				return fmt.Errorf("failed to unmarshal into DefaultEvent: %w", err)
 			}
@@ -42,13 +44,14 @@ func newTemplateConsumer(handler template.Event, bus bus.Bus) {
 
 	// Delete Event
 	bus.Subscribe(template.DELETED_COMMAND,
+		template.QUEUE,
 		func(ctx context.Context, data any) error {
-			var event template.DefaultEvent
+			var event template.DomainEvent
 			raw, err := toByte(data)
 			if err != nil {
 				return err
 			}
-			
+
 			if err := json.Unmarshal(raw, &event); err != nil {
 				return fmt.Errorf("failed to unmarshal into DefaultEvent: %w", err)
 			}

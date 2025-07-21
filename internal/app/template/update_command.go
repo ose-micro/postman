@@ -19,7 +19,7 @@ import (
 
 // Handler
 type updateCommandHandler struct {
-	repo   template.Repository
+	repo   template.Write
 	log    logger.Logger
 	bus    bus.Bus
 	tracer tracing.Tracer
@@ -49,10 +49,14 @@ func (u *updateCommandHandler) Handle(ctx context.Context, command template.Upda
 		return template.Domain{}, err
 	}
 
-	record, err := u.repo.ReadOne(ctx, dto.Filter{
-		Field:    "id",
-		Operator: dto.EQUAL,
-		Value:    command.Id,
+	record, err := u.repo.Read(ctx, dto.Query{
+		Filters: []dto.Filter{
+			{
+				Field: "id",
+				Op:    dto.OpEq,
+				Value: command.Id,
+			},
+		},
 	})
 	if err != nil {
 		span.RecordError(err)
@@ -66,10 +70,14 @@ func (u *updateCommandHandler) Handle(ctx context.Context, command template.Upda
 		return template.Domain{}, err
 	}
 
-	if check, _ := u.repo.ReadOne(ctx, dto.Filter{
-		Field:    "subject",
-		Operator: dto.EQUAL,
-		Value:    command.Subject,
+	if check, _ := u.repo.Read(ctx, dto.Query{
+		Filters: []dto.Filter{
+			{
+				Field: "subject",
+				Op:    dto.OpEq,
+				Value: command.Subject,
+			},
+		},
 	}); check != nil && check.GetID() != record.GetID() {
 		err := fmt.Errorf("template already exist with this subject")
 
@@ -85,8 +93,8 @@ func (u *updateCommandHandler) Handle(ctx context.Context, command template.Upda
 	}
 
 	if err := record.Update(template.Params{
-		Content: command.Content,
-		Subject: command.Subject,
+		Content:      command.Content,
+		Subject:      command.Subject,
 		Placeholders: command.Placeholders,
 	}); err != nil {
 		span.RecordError(err)
@@ -115,7 +123,7 @@ func (u *updateCommandHandler) Handle(ctx context.Context, command template.Upda
 	}
 
 	// publish bus
-	err = u.bus.Publish(command.CommandName(), template.DefaultEvent(record.MakePublic()))
+	err = u.bus.Publish(command.CommandName(), template.DomainEvent(record.MakePublic()))
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
@@ -136,7 +144,7 @@ func (u *updateCommandHandler) Handle(ctx context.Context, command template.Upda
 	return *record, nil
 }
 
-func newUpdateCommandHandler(bs domain.Domain, repo template.Repository, log logger.Logger,
+func newUpdateCommandHandler(bs domain.Domain, repo template.Write, log logger.Logger,
 	tracer tracing.Tracer, bus bus.Bus) cqrs.CommandHandle[template.UpdateCommand, template.Domain] {
 	return &updateCommandHandler{
 		repo:   repo,

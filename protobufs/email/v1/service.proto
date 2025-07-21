@@ -7,7 +7,6 @@ import "email/v1/data.proto";
 service EmailService {
   rpc Create(email.v1.CreateRequest) returns (email.v1.CreateResponse);
   rpc Read(email.v1.ReadRequest) returns (email.v1.ReadResponse);
-  rpc ReadOne(email.v1.ReadOneRequest) returns (email.v1.ReadOneResponse);
   rpc Resend(email.v1.ResendRequest) returns (email.v1.ResendResponse);
   rpc Delete(email.v1.DeleteRequest) returns (email.v1.DeleteResponse);
 }

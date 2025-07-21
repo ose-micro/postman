@@ -30,8 +30,9 @@ type Template struct {
 	Content       string                 `protobuf:"bytes,3,opt,name=content,proto3" json:"content,omitempty"`
 	Placeholders  []string               `protobuf:"bytes,4,rep,name=placeholders,proto3" json:"placeholders,omitempty"`
 	State         string                 `protobuf:"bytes,5,opt,name=state,proto3" json:"state,omitempty"`
-	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	Count         int32                  `protobuf:"varint,6,opt,name=count,proto3" json:"count,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -99,6 +100,13 @@ func (x *Template) GetState() string {
 		return x.State
 	}
 	return ""
+}
+
+func (x *Template) GetCount() int32 {
+	if x != nil {
+		return x.Count
+	}
+	return 0
 }
 
 func (x *Template) GetCreatedAt() *timestamppb.Timestamp {
@@ -227,27 +235,27 @@ func (x *CreateResponse) GetRecord() *Template {
 	return nil
 }
 
-type ReadOneRequest struct {
+type Templates struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Filter        []*v1.Filter           `protobuf:"bytes,1,rep,name=filter,proto3" json:"filter,omitempty"`
+	Data          []*Template            `protobuf:"bytes,1,rep,name=data,proto3" json:"data,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ReadOneRequest) Reset() {
-	*x = ReadOneRequest{}
+func (x *Templates) Reset() {
+	*x = Templates{}
 	mi := &file_template_v1_data_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ReadOneRequest) String() string {
+func (x *Templates) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ReadOneRequest) ProtoMessage() {}
+func (*Templates) ProtoMessage() {}
 
-func (x *ReadOneRequest) ProtoReflect() protoreflect.Message {
+func (x *Templates) ProtoReflect() protoreflect.Message {
 	mi := &file_template_v1_data_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -259,66 +267,14 @@ func (x *ReadOneRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ReadOneRequest.ProtoReflect.Descriptor instead.
-func (*ReadOneRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use Templates.ProtoReflect.Descriptor instead.
+func (*Templates) Descriptor() ([]byte, []int) {
 	return file_template_v1_data_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *ReadOneRequest) GetFilter() []*v1.Filter {
+func (x *Templates) GetData() []*Template {
 	if x != nil {
-		return x.Filter
-	}
-	return nil
-}
-
-type ReadOneResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
-	Record        *Template              `protobuf:"bytes,2,opt,name=record,proto3" json:"record,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ReadOneResponse) Reset() {
-	*x = ReadOneResponse{}
-	mi := &file_template_v1_data_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ReadOneResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ReadOneResponse) ProtoMessage() {}
-
-func (x *ReadOneResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_template_v1_data_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ReadOneResponse.ProtoReflect.Descriptor instead.
-func (*ReadOneResponse) Descriptor() ([]byte, []int) {
-	return file_template_v1_data_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *ReadOneResponse) GetMessage() string {
-	if x != nil {
-		return x.Message
-	}
-	return ""
-}
-
-func (x *ReadOneResponse) GetRecord() *Template {
-	if x != nil {
-		return x.Record
+		return x.Data
 	}
 	return nil
 }
@@ -332,7 +288,7 @@ type ReadRequest struct {
 
 func (x *ReadRequest) Reset() {
 	*x = ReadRequest{}
-	mi := &file_template_v1_data_proto_msgTypes[5]
+	mi := &file_template_v1_data_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -344,7 +300,7 @@ func (x *ReadRequest) String() string {
 func (*ReadRequest) ProtoMessage() {}
 
 func (x *ReadRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_template_v1_data_proto_msgTypes[5]
+	mi := &file_template_v1_data_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -357,7 +313,7 @@ func (x *ReadRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReadRequest.ProtoReflect.Descriptor instead.
 func (*ReadRequest) Descriptor() ([]byte, []int) {
-	return file_template_v1_data_proto_rawDescGZIP(), []int{5}
+	return file_template_v1_data_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *ReadRequest) GetRequest() *v1.Request {
@@ -369,16 +325,14 @@ func (x *ReadRequest) GetRequest() *v1.Request {
 
 type ReadResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Query         *v1.Request            `protobuf:"bytes,1,opt,name=query,proto3" json:"query,omitempty"`
-	Size          int64                  `protobuf:"varint,2,opt,name=size,proto3" json:"size,omitempty"`
-	Records       []*Template            `protobuf:"bytes,3,rep,name=records,proto3" json:"records,omitempty"`
+	Result        map[string]*Templates  `protobuf:"bytes,1,rep,name=result,proto3" json:"result,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ReadResponse) Reset() {
 	*x = ReadResponse{}
-	mi := &file_template_v1_data_proto_msgTypes[6]
+	mi := &file_template_v1_data_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -390,7 +344,7 @@ func (x *ReadResponse) String() string {
 func (*ReadResponse) ProtoMessage() {}
 
 func (x *ReadResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_template_v1_data_proto_msgTypes[6]
+	mi := &file_template_v1_data_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -403,26 +357,12 @@ func (x *ReadResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReadResponse.ProtoReflect.Descriptor instead.
 func (*ReadResponse) Descriptor() ([]byte, []int) {
-	return file_template_v1_data_proto_rawDescGZIP(), []int{6}
+	return file_template_v1_data_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *ReadResponse) GetQuery() *v1.Request {
+func (x *ReadResponse) GetResult() map[string]*Templates {
 	if x != nil {
-		return x.Query
-	}
-	return nil
-}
-
-func (x *ReadResponse) GetSize() int64 {
-	if x != nil {
-		return x.Size
-	}
-	return 0
-}
-
-func (x *ReadResponse) GetRecords() []*Template {
-	if x != nil {
-		return x.Records
+		return x.Result
 	}
 	return nil
 }
@@ -439,7 +379,7 @@ type UpdateRequest struct {
 
 func (x *UpdateRequest) Reset() {
 	*x = UpdateRequest{}
-	mi := &file_template_v1_data_proto_msgTypes[7]
+	mi := &file_template_v1_data_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -451,7 +391,7 @@ func (x *UpdateRequest) String() string {
 func (*UpdateRequest) ProtoMessage() {}
 
 func (x *UpdateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_template_v1_data_proto_msgTypes[7]
+	mi := &file_template_v1_data_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -464,7 +404,7 @@ func (x *UpdateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateRequest.ProtoReflect.Descriptor instead.
 func (*UpdateRequest) Descriptor() ([]byte, []int) {
-	return file_template_v1_data_proto_rawDescGZIP(), []int{7}
+	return file_template_v1_data_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *UpdateRequest) GetId() string {
@@ -504,7 +444,7 @@ type UpdateResponse struct {
 
 func (x *UpdateResponse) Reset() {
 	*x = UpdateResponse{}
-	mi := &file_template_v1_data_proto_msgTypes[8]
+	mi := &file_template_v1_data_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -516,7 +456,7 @@ func (x *UpdateResponse) String() string {
 func (*UpdateResponse) ProtoMessage() {}
 
 func (x *UpdateResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_template_v1_data_proto_msgTypes[8]
+	mi := &file_template_v1_data_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -529,7 +469,7 @@ func (x *UpdateResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateResponse.ProtoReflect.Descriptor instead.
 func (*UpdateResponse) Descriptor() ([]byte, []int) {
-	return file_template_v1_data_proto_rawDescGZIP(), []int{8}
+	return file_template_v1_data_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *UpdateResponse) GetMessage() string {
@@ -548,7 +488,7 @@ type DeleteRequest struct {
 
 func (x *DeleteRequest) Reset() {
 	*x = DeleteRequest{}
-	mi := &file_template_v1_data_proto_msgTypes[9]
+	mi := &file_template_v1_data_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -560,7 +500,7 @@ func (x *DeleteRequest) String() string {
 func (*DeleteRequest) ProtoMessage() {}
 
 func (x *DeleteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_template_v1_data_proto_msgTypes[9]
+	mi := &file_template_v1_data_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -573,7 +513,7 @@ func (x *DeleteRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteRequest.ProtoReflect.Descriptor instead.
 func (*DeleteRequest) Descriptor() ([]byte, []int) {
-	return file_template_v1_data_proto_rawDescGZIP(), []int{9}
+	return file_template_v1_data_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *DeleteRequest) GetId() string {
@@ -593,7 +533,7 @@ type DeleteResponse struct {
 
 func (x *DeleteResponse) Reset() {
 	*x = DeleteResponse{}
-	mi := &file_template_v1_data_proto_msgTypes[10]
+	mi := &file_template_v1_data_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -605,7 +545,7 @@ func (x *DeleteResponse) String() string {
 func (*DeleteResponse) ProtoMessage() {}
 
 func (x *DeleteResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_template_v1_data_proto_msgTypes[10]
+	mi := &file_template_v1_data_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -618,7 +558,7 @@ func (x *DeleteResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteResponse.ProtoReflect.Descriptor instead.
 func (*DeleteResponse) Descriptor() ([]byte, []int) {
-	return file_template_v1_data_proto_rawDescGZIP(), []int{10}
+	return file_template_v1_data_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *DeleteResponse) GetMessage() string {
@@ -639,35 +579,34 @@ var File_template_v1_data_proto protoreflect.FileDescriptor
 
 const file_template_v1_data_proto_rawDesc = "" +
 	"\n" +
-	"\x16template/v1/data.proto\x12\vtemplate.v1\x1a\x16common/v1/common.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xfe\x01\n" +
+	"\x16template/v1/data.proto\x12\vtemplate.v1\x1a\x16common/v1/common.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x94\x02\n" +
 	"\bTemplate\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
 	"\asubject\x18\x02 \x01(\tR\asubject\x12\x18\n" +
 	"\acontent\x18\x03 \x01(\tR\acontent\x12\"\n" +
 	"\fplaceholders\x18\x04 \x03(\tR\fplaceholders\x12\x14\n" +
-	"\x05state\x18\x05 \x01(\tR\x05state\x129\n" +
+	"\x05state\x18\x05 \x01(\tR\x05state\x12\x14\n" +
+	"\x05count\x18\x06 \x01(\x05R\x05count\x129\n" +
 	"\n" +
-	"created_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"created_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"g\n" +
+	"updated_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"g\n" +
 	"\rCreateRequest\x12\x18\n" +
 	"\acontent\x18\x01 \x01(\tR\acontent\x12\"\n" +
 	"\fplaceholders\x18\x02 \x03(\tR\fplaceholders\x12\x18\n" +
 	"\asubject\x18\x03 \x01(\tR\asubject\"Y\n" +
 	"\x0eCreateResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\x12-\n" +
-	"\x06record\x18\x02 \x01(\v2\x15.template.v1.TemplateR\x06record\";\n" +
-	"\x0eReadOneRequest\x12)\n" +
-	"\x06filter\x18\x01 \x03(\v2\x11.common.v1.FilterR\x06filter\"Z\n" +
-	"\x0fReadOneResponse\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessage\x12-\n" +
-	"\x06record\x18\x02 \x01(\v2\x15.template.v1.TemplateR\x06record\";\n" +
+	"\x06record\x18\x02 \x01(\v2\x15.template.v1.TemplateR\x06record\"6\n" +
+	"\tTemplates\x12)\n" +
+	"\x04data\x18\x01 \x03(\v2\x15.template.v1.TemplateR\x04data\";\n" +
 	"\vReadRequest\x12,\n" +
-	"\arequest\x18\x01 \x01(\v2\x12.common.v1.RequestR\arequest\"}\n" +
-	"\fReadResponse\x12(\n" +
-	"\x05query\x18\x01 \x01(\v2\x12.common.v1.RequestR\x05query\x12\x12\n" +
-	"\x04size\x18\x02 \x01(\x03R\x04size\x12/\n" +
-	"\arecords\x18\x03 \x03(\v2\x15.template.v1.TemplateR\arecords\"w\n" +
+	"\arequest\x18\x01 \x01(\v2\x12.common.v1.RequestR\arequest\"\xa0\x01\n" +
+	"\fReadResponse\x12=\n" +
+	"\x06result\x18\x01 \x03(\v2%.template.v1.ReadResponse.ResultEntryR\x06result\x1aQ\n" +
+	"\vResultEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12,\n" +
+	"\x05value\x18\x02 \x01(\v2\x16.template.v1.TemplatesR\x05value:\x028\x01\"w\n" +
 	"\rUpdateRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
 	"\acontent\x18\x02 \x01(\tR\acontent\x12\"\n" +
@@ -699,33 +638,31 @@ var file_template_v1_data_proto_goTypes = []any{
 	(*Template)(nil),              // 0: template.v1.Template
 	(*CreateRequest)(nil),         // 1: template.v1.CreateRequest
 	(*CreateResponse)(nil),        // 2: template.v1.CreateResponse
-	(*ReadOneRequest)(nil),        // 3: template.v1.ReadOneRequest
-	(*ReadOneResponse)(nil),       // 4: template.v1.ReadOneResponse
-	(*ReadRequest)(nil),           // 5: template.v1.ReadRequest
-	(*ReadResponse)(nil),          // 6: template.v1.ReadResponse
-	(*UpdateRequest)(nil),         // 7: template.v1.UpdateRequest
-	(*UpdateResponse)(nil),        // 8: template.v1.UpdateResponse
-	(*DeleteRequest)(nil),         // 9: template.v1.DeleteRequest
-	(*DeleteResponse)(nil),        // 10: template.v1.DeleteResponse
+	(*Templates)(nil),             // 3: template.v1.Templates
+	(*ReadRequest)(nil),           // 4: template.v1.ReadRequest
+	(*ReadResponse)(nil),          // 5: template.v1.ReadResponse
+	(*UpdateRequest)(nil),         // 6: template.v1.UpdateRequest
+	(*UpdateResponse)(nil),        // 7: template.v1.UpdateResponse
+	(*DeleteRequest)(nil),         // 8: template.v1.DeleteRequest
+	(*DeleteResponse)(nil),        // 9: template.v1.DeleteResponse
+	nil,                           // 10: template.v1.ReadResponse.ResultEntry
 	(*timestamppb.Timestamp)(nil), // 11: google.protobuf.Timestamp
-	(*v1.Filter)(nil),             // 12: common.v1.Filter
-	(*v1.Request)(nil),            // 13: common.v1.Request
+	(*v1.Request)(nil),            // 12: common.v1.Request
 }
 var file_template_v1_data_proto_depIdxs = []int32{
 	11, // 0: template.v1.Template.created_at:type_name -> google.protobuf.Timestamp
 	11, // 1: template.v1.Template.updated_at:type_name -> google.protobuf.Timestamp
 	0,  // 2: template.v1.CreateResponse.record:type_name -> template.v1.Template
-	12, // 3: template.v1.ReadOneRequest.filter:type_name -> common.v1.Filter
-	0,  // 4: template.v1.ReadOneResponse.record:type_name -> template.v1.Template
-	13, // 5: template.v1.ReadRequest.request:type_name -> common.v1.Request
-	13, // 6: template.v1.ReadResponse.query:type_name -> common.v1.Request
-	0,  // 7: template.v1.ReadResponse.records:type_name -> template.v1.Template
-	0,  // 8: template.v1.DeleteResponse.record:type_name -> template.v1.Template
-	9,  // [9:9] is the sub-list for method output_type
-	9,  // [9:9] is the sub-list for method input_type
-	9,  // [9:9] is the sub-list for extension type_name
-	9,  // [9:9] is the sub-list for extension extendee
-	0,  // [0:9] is the sub-list for field type_name
+	0,  // 3: template.v1.Templates.data:type_name -> template.v1.Template
+	12, // 4: template.v1.ReadRequest.request:type_name -> common.v1.Request
+	10, // 5: template.v1.ReadResponse.result:type_name -> template.v1.ReadResponse.ResultEntry
+	0,  // 6: template.v1.DeleteResponse.record:type_name -> template.v1.Template
+	3,  // 7: template.v1.ReadResponse.ResultEntry.value:type_name -> template.v1.Templates
+	8,  // [8:8] is the sub-list for method output_type
+	8,  // [8:8] is the sub-list for method input_type
+	8,  // [8:8] is the sub-list for extension type_name
+	8,  // [8:8] is the sub-list for extension extendee
+	0,  // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_template_v1_data_proto_init() }
