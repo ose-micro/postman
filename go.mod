@@ -5,7 +5,7 @@ go 1.24.1
 require (
 	github.com/lib/pq v1.10.9
 	github.com/ose-micro/core v0.1.5
-	github.com/ose-micro/cqrs v0.2.8
+	github.com/ose-micro/cqrs v0.3.0
 	github.com/ose-micro/grpc v0.0.4
 	github.com/ose-micro/mailer v0.0.2
 	github.com/ose-micro/mongo v0.2.0
