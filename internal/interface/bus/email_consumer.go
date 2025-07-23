@@ -1,4 +1,4 @@
-package nats
+package bus
 
 import (
 	"context"
@@ -12,7 +12,7 @@ import (
 func newEmailConsumer(handler email.Event, app email.App, bus bus.Bus) {
 	// Created Event
 	bus.Subscribe(email.CREATED_COMMAND,
-		email.QUEUE,
+		QUEUE,
 		func(ctx context.Context, data any) error {
 			var event email.DomainEvent
 			raw, err := toByte(data)
@@ -28,7 +28,7 @@ func newEmailConsumer(handler email.Event, app email.App, bus bus.Bus) {
 
 	// Updated Event
 	bus.Subscribe(email.UPDATED_COMMAND,
-		email.QUEUE,
+		QUEUE,
 		func(ctx context.Context, data any) error {
 			var event email.DomainEvent
 			raw, err := toByte(data)
@@ -44,7 +44,7 @@ func newEmailConsumer(handler email.Event, app email.App, bus bus.Bus) {
 
 	// Send Event
 	bus.Subscribe(email.SEND_MAIL_EVENT,
-		email.QUEUE,
+		QUEUE,
 		func(ctx context.Context, data any) error {
 			var event email.SendCommand
 			raw, err := toByte(data)

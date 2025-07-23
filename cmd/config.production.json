@@ -12,7 +12,8 @@
     }
   },
   "bus": {
-    "url": ""
+    "url": "",
+    "exchange": ""
   },
   "grpc": {
     "port": 0

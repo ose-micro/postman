@@ -1,4 +1,4 @@
-package nats
+package bus
 
 import (
 	"context"
@@ -12,7 +12,7 @@ import (
 func newTemplateConsumer(handler template.Event, bus bus.Bus) {
 	// Created Event
 	bus.Subscribe(template.CREATED_COMMAND,
-		"",
+		QUEUE,
 		func(ctx context.Context, data any) error {
 			var event template.DomainEvent
 			raw, err := toByte(data)
@@ -28,7 +28,7 @@ func newTemplateConsumer(handler template.Event, bus bus.Bus) {
 
 	// Updated Event
 	bus.Subscribe(template.UPDATED_COMMAND,
-		template.QUEUE,
+		QUEUE,
 		func(ctx context.Context, data any) error {
 			var event template.DomainEvent
 			raw, err := toByte(data)
@@ -44,7 +44,7 @@ func newTemplateConsumer(handler template.Event, bus bus.Bus) {
 
 	// Delete Event
 	bus.Subscribe(template.DELETED_COMMAND,
-		template.QUEUE,
+		QUEUE,
 		func(ctx context.Context, data any) error {
 			var event template.DomainEvent
 			raw, err := toByte(data)

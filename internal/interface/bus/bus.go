@@ -1,4 +1,4 @@
-package nats
+package bus
 
 import (
 	"encoding/json"
@@ -14,6 +14,8 @@ func InvokeConsumers(events events.Events, app app.Apps, log logger.Logger, bus 
 	newTemplateConsumer(events.Template, bus)
 	newEmailConsumer(events.Email, app.Email, bus)
 }
+
+const QUEUE = "ose_postman_queue"
 
 func toByte(data interface{}) ([]byte, error) {
     mapData, ok := data.(map[string]interface{})

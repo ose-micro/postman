@@ -5,7 +5,7 @@ import (
 	"github.com/moriba-cloud/ose-postman/internal/domain"
 	"github.com/moriba-cloud/ose-postman/internal/events"
 	"github.com/moriba-cloud/ose-postman/internal/interface/grpc"
-	consumer "github.com/moriba-cloud/ose-postman/internal/interface/nats"
+	consumer "github.com/moriba-cloud/ose-postman/internal/interface/bus"
 	"github.com/moriba-cloud/ose-postman/internal/repository/read"
 	"github.com/moriba-cloud/ose-postman/internal/repository/write"
 	ose "github.com/ose-micro/core"
