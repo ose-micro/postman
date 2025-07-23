@@ -5,7 +5,7 @@ go 1.24.1
 require (
 	github.com/lib/pq v1.10.9
 	github.com/ose-micro/core v0.1.5
-	github.com/ose-micro/cqrs v0.3.2
+	github.com/ose-micro/cqrs v0.3.3
 	github.com/ose-micro/grpc v0.0.4
 	github.com/ose-micro/mailer v0.0.2
 	github.com/ose-micro/mongo v0.2.0
@@ -38,6 +38,9 @@ require (
 	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/montanaflynn/stats v0.7.1 // indirect
+	github.com/nats-io/nats.go v1.43.0 // indirect
+	github.com/nats-io/nkeys v0.4.11 // indirect
+	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.3 // indirect
 	github.com/sagikazarmark/locafero v0.7.0 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect

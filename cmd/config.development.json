@@ -12,8 +12,7 @@
     }
   },
   "bus": {
-    "url": "",
-    "exchange": ""
+    "url": ""
   },
   "redis": {
     "address": "localhost:6379",
