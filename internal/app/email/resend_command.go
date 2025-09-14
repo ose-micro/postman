@@ -4,14 +4,16 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/moriba-cloud/ose-postman/internal/domain"
-	"github.com/moriba-cloud/ose-postman/internal/domain/email"
 	"github.com/ose-micro/core/dto"
 	"github.com/ose-micro/core/logger"
 	"github.com/ose-micro/core/tracing"
 	"github.com/ose-micro/cqrs"
 	"github.com/ose-micro/cqrs/bus"
+	ose_error "github.com/ose-micro/error"
 	"github.com/ose-micro/mailer"
+	"github.com/ose-micro/postman/internal/business"
+	"github.com/ose-micro/postman/internal/business/email"
+	"github.com/ose-micro/postman/internal/infrastructure/repository"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
@@ -20,18 +22,18 @@ import (
 
 // Handler
 type resendCommandHandler struct {
-	repo   email.Write
+	repo   repository.Repository
 	log    logger.Logger
 	bus    bus.Bus
 	mailer *mailer.Mailer
 	tracer tracing.Tracer
-	bs     domain.Domain
+	bs     business.Domain
 }
 
 // Handle implements cqrs.CommandHandle.
-func (u *resendCommandHandler) Handle(ctx context.Context, command email.IdCommand) (email.Domain, error) {
+func (u *resendCommandHandler) Handle(ctx context.Context, command email.IdCommand) (*email.Domain, error) {
 	ctx, span := u.tracer.Start(ctx, "app.email.resend_mail.command.handler", trace.WithAttributes(
-		attribute.String("operation", "RESEND_MAIL"),
+		attribute.String("operation", "resend_mail"),
 		attribute.String("payload", fmt.Sprintf("%v", command)),
 	))
 	defer span.End()
@@ -41,65 +43,72 @@ func (u *resendCommandHandler) Handle(ctx context.Context, command email.IdComma
 
 	// validate command payload
 	if err := command.Validate(); err != nil {
+		err := ose_error.Wrap(err, ose_error.ErrBadRequest, err.Error(), traceId)
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
 		u.log.Error("validation process failed",
 			zap.String("trace_id", traceId),
-			zap.String("operation", "RESEND_MAIL"),
+			zap.String("operation", "resend_mail"),
 			zap.Error(err),
 		)
 
-		return email.Domain{}, err
+		return nil, err
 	}
 
-	record, err := u.repo.Read(ctx, dto.Query{
-		Filters: []dto.Filter{
+	record, err := u.repo.Email.ReadOne(ctx, dto.Request{
+		Queries: []dto.Query{
 			{
-				Field: "id",
-				Op:    dto.OpEq,
-				Value: command.Id,
+				Name: "one",
+				Filters: []dto.Filter{
+					{
+						Field: "_id",
+						Op:    dto.OpEq,
+						Value: command.Id,
+					},
+				},
 			},
 		},
 	})
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
-		u.log.Error("failed to read email",
+		u.log.Error("failed to repository email",
 			zap.String("trace_id", traceId),
-			zap.String("operation", "RESEND_MAIL"),
+			zap.String("operation", "resend_mail"),
 			zap.Error(err),
 		)
 
-		return email.Domain{}, err
+		return nil, err
 	}
 
-	if record.GetState() == email.StateComplete {
-		err = fmt.Errorf("email is already in a completed state")
+	if record.State() == email.StateComplete {
+		err = ose_error.New(ose_error.ErrNotFound, "email is already in a completed state", traceId)
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
 		u.log.Error("failed to send mail",
 			zap.String("trace_id", traceId),
-			zap.String("operation", "RESEND_MAIL"),
+			zap.String("operation", "resend_mail"),
 			zap.Error(err),
 		)
 
-		return email.Domain{}, err
+		return nil, err
 	}
 
 	err = u.mailer.Send(ctx, mailer.Params{
-		Sender:    record.GetSender(),
-		Recipient: record.GetRecipient(),
-		Subject:   record.GetSubject(),
-		Message:   record.GetMessage(),
-		Data:      record.GetData(),
-		From:      record.GetFrom(),
+		Sender:    record.Sender(),
+		Recipient: record.Recipient(),
+		Subject:   record.Subject(),
+		Message:   record.Message(),
+		Data:      record.Data(),
+		From:      record.From(),
 	})
 	if err != nil {
+		err := ose_error.Wrap(err, ose_error.ErrInternalServerError, err.Error(), traceId)
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
 		u.log.Error("failed to resend mail",
 			zap.String("trace_id", traceId),
-			zap.String("operation", "RESEND_MAIL"),
+			zap.String("operation", "resend_mail"),
 			zap.Error(err),
 		)
 
@@ -110,43 +119,29 @@ func (u *resendCommandHandler) Handle(ctx context.Context, command email.IdComma
 	record.SetState(state)
 
 	// save email to write store
-	err = u.repo.Update(ctx, *record)
+	err = u.repo.Email.Update(ctx, *record)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
 		u.log.Error("failed to update to postgres",
 			zap.String("trace_id", traceId),
-			zap.String("operation", "UPDATE"),
+			zap.String("operation", "resend_mail"),
 			zap.Error(err),
 		)
 
-		return email.Domain{}, err
-	}
-
-	// publish bus
-	err = u.bus.Publish(command.CommandName(), email.DomainEvent(record.MakePublic()))
-	if err != nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, err.Error())
-		u.log.Error("publish email updated",
-			zap.String("trace_id", traceId),
-			zap.String("operation", "UPDATE"),
-			zap.Error(err),
-		)
-
-		return email.Domain{}, err
+		return nil, err
 	}
 
 	u.log.Info("update process complete successfully",
 		zap.String("trace_id", traceId),
-		zap.String("operation", "UPDATE"),
+		zap.String("operation", "resend_mail"),
 		zap.Any("payload", command),
 	)
-	return *record, nil
+	return record, nil
 }
 
-func newResendCommandHandler(bs domain.Domain, repo email.Write, log logger.Logger,
-	tracer tracing.Tracer, bus bus.Bus, mailer *mailer.Mailer) cqrs.CommandHandle[email.IdCommand, email.Domain] {
+func newResendCommandHandler(bs business.Domain, repo repository.Repository, log logger.Logger,
+	tracer tracing.Tracer, bus bus.Bus, mailer *mailer.Mailer) cqrs.CommandHandle[email.IdCommand, *email.Domain] {
 	return &resendCommandHandler{
 		repo:   repo,
 		log:    log,

@@ -4,13 +4,14 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/moriba-cloud/ose-postman/internal/domain"
-	"github.com/moriba-cloud/ose-postman/internal/domain/template"
 	"github.com/ose-micro/core/logger"
 	"github.com/ose-micro/core/tracing"
 	"github.com/ose-micro/cqrs"
 	"github.com/ose-micro/cqrs/bus"
+	ose_error "github.com/ose-micro/error"
 	"github.com/ose-micro/mailer"
+	"github.com/ose-micro/postman/internal/business"
+	"github.com/ose-micro/postman/internal/business/template"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
@@ -19,18 +20,18 @@ import (
 
 // Handler
 type createCommandHandler struct {
-	repo   template.Write
+	repo   template.Repo
 	log    logger.Logger
 	mailer *mailer.Mailer
 	bus    bus.Bus
 	tracer tracing.Tracer
-	bs     domain.Domain
+	bs     business.Domain
 }
 
 // Handle implements cqrs.CommandHandle.
-func (c *createCommandHandler) Handle(ctx context.Context, command template.CreateCommand) (template.Domain, error) {
+func (c *createCommandHandler) Handle(ctx context.Context, command template.CreateCommand) (*template.Domain, error) {
 	ctx, span := c.tracer.Start(ctx, "app.template.create.command.handler", trace.WithAttributes(
-		attribute.String("operation", "CREATE"),
+		attribute.String("operation", "create"),
 		attribute.String("payload", fmt.Sprintf("%v", command)),
 	))
 	defer span.End()
@@ -39,22 +40,32 @@ func (c *createCommandHandler) Handle(ctx context.Context, command template.Crea
 
 	// validate command payload
 	if err := command.Validate(); err != nil {
+		err := ose_error.Wrap(err, ose_error.ErrBadRequest, err.Error(), traceId)
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
 		c.log.Error("validation process fail",
 			zap.String("trace_id", traceId),
-			zap.String("operation", "CREATE"),
+			zap.String("operation", "create"),
 			zap.Any("details", err),
 		)
 
-		return template.Domain{}, err
+		return nil, err
 	}
 
 	if err := c.mailer.ValidateData(command.Content, command.Placeholders); err != nil {
-		return template.Domain{}, err
+		err := ose_error.Wrap(err, ose_error.ErrBadRequest, err.Error(), traceId)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		c.log.Error("validation process fail",
+			zap.String("trace_id", traceId),
+			zap.String("operation", "create"),
+			zap.Any("details", err),
+		)
+
+		return nil, err
 	}
 
-	// create domain
+	// create template
 	domain, err := c.bs.Template.New(template.Params{
 		Content:      command.Content,
 		Subject:      command.Subject,
@@ -63,13 +74,13 @@ func (c *createCommandHandler) Handle(ctx context.Context, command template.Crea
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
-		c.log.Error("failed to create domain",
+		c.log.Error("failed to create template",
 			zap.String("trace_id", traceId),
-			zap.String("operation", "CREATE"),
+			zap.String("operation", "create"),
 			zap.Error(err),
 		)
 
-		return template.Domain{}, err
+		return nil, err
 	}
 
 	// save template to write store
@@ -77,39 +88,25 @@ func (c *createCommandHandler) Handle(ctx context.Context, command template.Crea
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
-		c.log.Error("fail while saving domain",
+		c.log.Error("fail while saving template",
 			zap.String("trace_id", traceId),
-			zap.String("operation", "CREATE"),
+			zap.String("operation", "create"),
 			zap.Error(err),
 		)
 
-		return template.Domain{}, err
-	}
-
-	// publish bus
-	err = c.bus.Publish(command.CommandName(), template.DomainEvent(domain.MakePublic()))
-	if err != nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, err.Error())
-		c.log.Error("publish template created",
-			zap.String("trace_id", traceId),
-			zap.String("operation", "CREATE"),
-			zap.Error(err),
-		)
-
-		return template.Domain{}, err
+		return nil, err
 	}
 
 	c.log.Info("create process complete successfully",
 		zap.String("trace_id", traceId),
-		zap.String("operation", "CREATE"),
+		zap.String("operation", "create"),
 		zap.Any("payload", command),
 	)
-	return *domain, nil
+	return domain, nil
 }
 
-func newCreateCommandHandler(bs domain.Domain, repo template.Write, log logger.Logger,
-	tracer tracing.Tracer, bus bus.Bus, mailer *mailer.Mailer) cqrs.CommandHandle[template.CreateCommand, template.Domain] {
+func newCreateCommandHandler(bs business.Domain, repo template.Repo, log logger.Logger,
+	tracer tracing.Tracer, bus bus.Bus, mailer *mailer.Mailer) cqrs.CommandHandle[template.CreateCommand, *template.Domain] {
 	return &createCommandHandler{
 		repo:   repo,
 		log:    log,

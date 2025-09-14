@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+package ose.micro.postman.email.v1;
+
+import "ose/micro/common/v1/request.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/ose-micro/postman/internal/api/grpc/gen/go/ose/micro/postman/email/v1;emailv1";
+
+enum State {
+  StateUnknown = 0;
+  StateFailed = 1;
+  StateComplete = 2;
+}
+
+message Email {
+  string id = 1;
+  string recipient = 2;
+  map<string, string> data = 3;
+  string subject = 4;
+  string sender = 5;
+  string from = 6;
+  string template = 7;
+  string message = 8;
+  State state = 9;
+  int32 count = 10;
+  google.protobuf.Timestamp created_at = 11;
+  google.protobuf.Timestamp updated_at = 12;
+}
+
+message CreateRequest {
+  string recipient = 1;
+  map<string, string> data = 2;
+  string sender = 3;
+  string template = 4;
+  string from = 5;
+}
+
+message CreateResponse {
+  string message = 1;
+  Email record = 2;
+}
+
+message ResendRequest {
+  string id = 1;
+}
+
+message ResendResponse {
+  string message = 1;
+}
+
+message Emails {
+  repeated Email data = 1;
+}
+
+message ReadRequest {
+  ose.micro.common.v1.Request request = 1;
+}
+
+message ReadResponse {
+  map<string, Emails> result = 1;
+}
+
+message DeleteRequest {
+  string id = 1;
+}
+
+message DeleteResponse {
+  string message = 1;
+  Email record = 2;
+}

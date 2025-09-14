@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package ose.micro.postman.template.v1;
+
+import "ose/micro/postman/template/v1/data.proto";
+
+option go_package = "github.com/ose-micro/postman/internal/api/grpc/gen/go/ose/micro/postman/template/v1;templatev1";
+
+service TemplateService {
+  rpc Create(ose.micro.postman.template.v1.CreateRequest) returns (ose.micro.postman.template.v1.CreateResponse);
+  rpc Read(ose.micro.postman.template.v1.ReadRequest) returns (ose.micro.postman.template.v1.ReadResponse);
+  rpc Update(ose.micro.postman.template.v1.UpdateRequest) returns (ose.micro.postman.template.v1.UpdateResponse);
+  rpc Delete(ose.micro.postman.template.v1.DeleteRequest) returns (ose.micro.postman.template.v1.DeleteResponse);
+}

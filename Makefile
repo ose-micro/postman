@@ -18,4 +18,4 @@ push:
 
 .PHONY: gen-common
 gen-common:
-	clear && buf generate buf.build/moriba-sl/ose
+	clear && buf generate buf.build/ose-micro/common

@@ -11,9 +11,13 @@
       "sampleRatio": 1.0
     }
   },
-  "bus": {
+  "nats": {
     "url": "",
-    "exchange": ""
+    "name": "",
+    "user": "",
+    "password": "",
+    "timeout": "",
+    "max_reconnect": -1
   },
   "grpc": {
     "port": 0

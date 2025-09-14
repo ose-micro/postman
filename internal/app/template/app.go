@@ -4,14 +4,14 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/moriba-cloud/ose-postman/internal/domain"
-	"github.com/moriba-cloud/ose-postman/internal/domain/template"
 	"github.com/ose-micro/core/dto"
 	"github.com/ose-micro/core/logger"
 	"github.com/ose-micro/core/tracing"
 	"github.com/ose-micro/cqrs"
 	"github.com/ose-micro/cqrs/bus"
 	"github.com/ose-micro/mailer"
+	"github.com/ose-micro/postman/internal/business"
+	"github.com/ose-micro/postman/internal/business/template"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
@@ -19,18 +19,18 @@ import (
 )
 
 type templateApp struct {
-	tracer   tracing.Tracer
-	log      logger.Logger
-	create   cqrs.CommandHandle[template.CreateCommand, template.Domain]
-	update   cqrs.CommandHandle[template.UpdateCommand, template.Domain]
-	delete   cqrs.CommandHandle[template.DeleteCommand, template.Domain]
-	read     cqrs.QueryHandle[template.ReadQuery, map[string]any]
+	tracer tracing.Tracer
+	log    logger.Logger
+	create cqrs.CommandHandle[template.CreateCommand, *template.Domain]
+	update cqrs.CommandHandle[template.UpdateCommand, bool]
+	delete cqrs.CommandHandle[template.DeleteCommand, bool]
+	read   cqrs.QueryHandle[template.ReadQuery, map[string]any]
 }
 
 // Create implements template.App.
-func (t *templateApp) Create(ctx context.Context, command template.CreateCommand) (template.Domain, error) {
+func (t *templateApp) Create(ctx context.Context, command template.CreateCommand) (*template.Domain, error) {
 	ctx, span := t.tracer.Start(ctx, "app.template.create.command", trace.WithAttributes(
-		attribute.String("operation", "CREATE"),
+		attribute.String("operation", "create"),
 		attribute.String("payload", fmt.Sprintf("%v", command)),
 	))
 	defer span.End()
@@ -43,11 +43,11 @@ func (t *templateApp) Create(ctx context.Context, command template.CreateCommand
 		span.SetStatus(codes.Error, err.Error())
 		t.log.Error("failed to process command",
 			zap.String("trace_id", traceId),
-			zap.String("operation", "CREATE"),
+			zap.String("operation", "create"),
 			zap.Error(err),
 		)
 
-		return template.Domain{}, err
+		return nil, err
 	}
 
 	return record, nil
@@ -56,7 +56,7 @@ func (t *templateApp) Create(ctx context.Context, command template.CreateCommand
 // Delete implements template.App.
 func (t *templateApp) Delete(ctx context.Context, command template.DeleteCommand) error {
 	ctx, span := t.tracer.Start(ctx, "app.template.delete.command", trace.WithAttributes(
-		attribute.String("operation", "DELETE"),
+		attribute.String("operation", "delete"),
 		attribute.String("payload", fmt.Sprintf("%v", command)),
 	))
 	defer span.End()
@@ -67,7 +67,7 @@ func (t *templateApp) Delete(ctx context.Context, command template.DeleteCommand
 		span.SetStatus(codes.Error, err.Error())
 		t.log.Error("failed to process command",
 			zap.String("trace_id", traceId),
-			zap.String("operation", "DELETE"),
+			zap.String("operation", "delete"),
 			zap.Error(err),
 		)
 
@@ -80,7 +80,7 @@ func (t *templateApp) Delete(ctx context.Context, command template.DeleteCommand
 // Read implements template.App.
 func (t *templateApp) Read(ctx context.Context, request dto.Request) (map[string]any, error) {
 	ctx, span := t.tracer.Start(ctx, "app.email.read.query", trace.WithAttributes(
-		attribute.String("operation", "READ"),
+		attribute.String("operation", "read"),
 		attribute.String("payload", fmt.Sprintf("%v", request)),
 	))
 	defer span.End()
@@ -95,7 +95,7 @@ func (t *templateApp) Read(ctx context.Context, request dto.Request) (map[string
 		span.SetStatus(codes.Error, err.Error())
 		t.log.Error("failed to process command",
 			zap.String("trace_id", traceId),
-			zap.String("operation", "READ"),
+			zap.String("operation", "read"),
 			zap.Error(err),
 		)
 		return nil, err
@@ -107,7 +107,7 @@ func (t *templateApp) Read(ctx context.Context, request dto.Request) (map[string
 // Update implements template.App.
 func (t *templateApp) Update(ctx context.Context, command template.UpdateCommand) error {
 	ctx, span := t.tracer.Start(ctx, "app.template.update.command", trace.WithAttributes(
-		attribute.String("operation", "UPDATE"),
+		attribute.String("operation", "update"),
 		attribute.String("payload", fmt.Sprintf("%v", command)),
 	))
 	defer span.End()
@@ -118,7 +118,7 @@ func (t *templateApp) Update(ctx context.Context, command template.UpdateCommand
 		span.SetStatus(codes.Error, err.Error())
 		t.log.Error("failed to process command",
 			zap.String("trace_id", traceId),
-			zap.String("operation", "UPDATE"),
+			zap.String("operation", "update"),
 			zap.Error(err),
 		)
 
@@ -128,14 +128,14 @@ func (t *templateApp) Update(ctx context.Context, command template.UpdateCommand
 	return nil
 }
 
-func NewTemplateApp(bs domain.Domain, log logger.Logger, tracer tracing.Tracer, write template.Write,
-	read template.Read, bus bus.Bus, mailer *mailer.Mailer) template.App {
+func NewTemplateApp(bs business.Domain, log logger.Logger, tracer tracing.Tracer,
+	repo template.Repo, bus bus.Bus, mailer *mailer.Mailer) template.App {
 	return &templateApp{
 		tracer: tracer,
-		log: log,
-		create:   newCreateCommandHandler(bs, write, log, tracer, bus, mailer),
-		read:     newReadQueryHandler(read, log, tracer),
-		update:   newUpdateCommandHandler(bs, write, log, tracer, bus),
-		delete:   newDeleteCommandHandler(bs, write, log, tracer, bus),
+		log:    log,
+		create: newCreateCommandHandler(bs, repo, log, tracer, bus, mailer),
+		read:   newReadQueryHandler(repo, log, tracer),
+		update: newUpdateCommandHandler(bs, repo, log, tracer, bus),
+		delete: newDeleteCommandHandler(bs, repo, log, tracer, bus),
 	}
 }

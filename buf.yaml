@@ -1,10 +1,10 @@
 version: v2
 modules:
   - path: protobufs
-    name: buf.build/ose-micro/ose-postman
+    name: buf.build/ose-micro/postman
     lint:
       use:
-        - DEFAULT
+        - STANDARD
 
       disallow_comment_ignores: true
       enum_zero_value_suffix: _UNSPECIFIED
@@ -14,10 +14,10 @@ modules:
       service_suffix: Service
 lint:
   use:
-    - DEFAULT
+    - STANDARD
 breaking:
   use:
     - FILE
 
 deps:
-  - buf.build/moriba-sl/ose
+  - buf.build/ose-micro/common

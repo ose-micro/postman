@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package ose.micro.postman.email.v1;
+
+import "ose/micro/postman/email/v1/data.proto";
+
+option go_package = "github.com/ose-micro/postman/internal/api/grpc/gen/go/ose/micro/postman/email/v1;emailv1";
+
+service EmailService {
+  rpc Create(ose.micro.postman.email.v1.CreateRequest) returns (ose.micro.postman.email.v1.CreateResponse);
+  rpc Read(ose.micro.postman.email.v1.ReadRequest) returns (ose.micro.postman.email.v1.ReadResponse);
+  rpc Resend(ose.micro.postman.email.v1.ResendRequest) returns (ose.micro.postman.email.v1.ResendResponse);
+  rpc Delete(ose.micro.postman.email.v1.DeleteRequest) returns (ose.micro.postman.email.v1.DeleteResponse);
+}

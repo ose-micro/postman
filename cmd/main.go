@@ -1,45 +1,38 @@
 package main
 
 import (
-	"github.com/moriba-cloud/ose-postman/internal/app"
-	"github.com/moriba-cloud/ose-postman/internal/domain"
-	"github.com/moriba-cloud/ose-postman/internal/events"
-	"github.com/moriba-cloud/ose-postman/internal/interface/grpc"
-	consumer "github.com/moriba-cloud/ose-postman/internal/interface/bus"
-	"github.com/moriba-cloud/ose-postman/internal/repository/read"
-	"github.com/moriba-cloud/ose-postman/internal/repository/write"
 	ose "github.com/ose-micro/core"
 	"github.com/ose-micro/core/config"
 	"github.com/ose-micro/core/logger"
 	"github.com/ose-micro/core/timestamp"
 	"github.com/ose-micro/core/tracing"
-	"github.com/ose-micro/cqrs/bus/nats"
 	"github.com/ose-micro/mailer"
 	mongodb "github.com/ose-micro/mongo"
+	"github.com/ose-micro/nats"
 	"github.com/ose-micro/postgres"
+	consumer "github.com/ose-micro/postman/internal/api/bus"
+	"github.com/ose-micro/postman/internal/api/grpc"
+	"github.com/ose-micro/postman/internal/app"
+	"github.com/ose-micro/postman/internal/business"
+	"github.com/ose-micro/postman/internal/infrastructure/repository"
 	"go.uber.org/fx"
 )
 
 func main() {
-	app := ose.New(
+	ose.New(
 		fx.Provide(
 			loadConfig,
-			domain.InjectDomain,
+			business.InjectDomain,
 			postgres.New,
 			mongodb.New,
 			mailer.New,
 			app.InjectApps,
 			nats.New,
-			events.Inject,
-			write.InjectRepository,
-			read.InjectRepository,
+			repository.InjectRepository,
 		),
-		fx.Invoke(write.Migrate),
 		fx.Invoke(consumer.InvokeConsumers),
 		fx.Invoke(grpc.RunGRPCServer),
-	)
-
-	app.Run()
+	).Run()
 }
 
 func loadConfig() (config.Service, logger.Config, tracing.Config, timestamp.Config,
@@ -51,7 +44,7 @@ func loadConfig() (config.Service, logger.Config, tracing.Config, timestamp.Conf
 	var mailerConfig mailer.Config
 
 	conf, err := config.Load(
-		config.WithExtension("bus", &natsConf),
+		config.WithExtension("nats", &natsConf),
 		config.WithExtension("postgres", &postgresConfig),
 		config.WithExtension("mongo", &mongoConfig),
 		config.WithExtension("grpc", &grpcConfig),
@@ -63,6 +56,6 @@ func loadConfig() (config.Service, logger.Config, tracing.Config, timestamp.Conf
 			nil, mongodb.Config{}, nats.Config{}, grpc.Config{}, nil, err
 	}
 
-	return conf.Core.Service, conf.Core.Service.Logger, conf.Core.Service.Tracer, conf.Core.Service.Timestamp, 
-	&postgresConfig, mongoConfig, natsConf, grpcConfig, &mailerConfig, nil
+	return conf.Core.Service, conf.Core.Service.Logger, conf.Core.Service.Tracer, conf.Core.Service.Timestamp,
+		&postgresConfig, mongoConfig, natsConf, grpcConfig, &mailerConfig, nil
 }

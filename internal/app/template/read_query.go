@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/moriba-cloud/ose-postman/internal/domain/template"
 	"github.com/ose-micro/core/logger"
 	"github.com/ose-micro/core/tracing"
 	"github.com/ose-micro/cqrs"
+	"github.com/ose-micro/postman/internal/business/template"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
@@ -15,15 +15,15 @@ import (
 )
 
 type readQueryHandler struct {
-	repo   template.Read
+	repo   template.Repo
 	log    logger.Logger
 	tracer tracing.Tracer
 }
 
 // Handle implements cqrs.QueryHandle.
 func (r *readQueryHandler) Handle(ctx context.Context, query template.ReadQuery) (map[string]any, error) {
-	ctx, span := r.tracer.Start(ctx, "app.template.read.query.handler", trace.WithAttributes(
-		attribute.String("operation", "READ"),
+	ctx, span := r.tracer.Start(ctx, "app.template.repository.query.handler", trace.WithAttributes(
+		attribute.String("operation", "read"),
 		attribute.String("payload", fmt.Sprintf("%v", query)),
 	))
 	defer span.End()
@@ -35,28 +35,28 @@ func (r *readQueryHandler) Handle(ctx context.Context, query template.ReadQuery)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
-		r.log.Error("failed to read roles",
+		r.log.Error("failed to repository roles",
 			zap.String("trace_id", traceId),
-			zap.String("operation", "READ"),
+			zap.String("operation", "read"),
 			zap.Error(err),
 		)
 
 		return nil, err
 	}
 
-	r.log.Info("read process complete successfully",
+	r.log.Info("repository process complete successfully",
 		zap.String("trace_id", traceId),
-		zap.String("operation", "READ"),
+		zap.String("operation", "read"),
 		zap.Any("payload", fmt.Sprintf("%v", query)),
 	)
 	return records, nil
 }
 
-func newReadQueryHandler(repo template.Read, log logger.Logger,
+func newReadQueryHandler(repo template.Repo, log logger.Logger,
 	tracer tracing.Tracer) cqrs.QueryHandle[template.ReadQuery, map[string]any] {
 	return &readQueryHandler{
-		repo: repo,
-		log: log,
+		repo:   repo,
+		log:    log,
 		tracer: tracer,
 	}
 }

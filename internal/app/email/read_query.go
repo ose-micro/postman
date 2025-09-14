@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/moriba-cloud/ose-postman/internal/domain/email"
 	"github.com/ose-micro/core/logger"
 	"github.com/ose-micro/core/tracing"
 	"github.com/ose-micro/cqrs"
+	"github.com/ose-micro/postman/internal/business/email"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
@@ -15,15 +15,15 @@ import (
 )
 
 type readQueryHandler struct {
-	repo   email.Read
+	repo   email.Repo
 	log    logger.Logger
 	tracer tracing.Tracer
 }
 
 // Handle implements cqrs.QueryHandle.
 func (r *readQueryHandler) Handle(ctx context.Context, query email.ReadQuery) (map[string]any, error) {
-	ctx, span := r.tracer.Start(ctx, "app.email.read.query.handler", trace.WithAttributes(
-		attribute.String("operation", "READ"),
+	ctx, span := r.tracer.Start(ctx, "app.email.repository.query.handler", trace.WithAttributes(
+		attribute.String("operation", "read"),
 		attribute.String("payload", fmt.Sprintf("%v", query)),
 	))
 	defer span.End()
@@ -35,28 +35,28 @@ func (r *readQueryHandler) Handle(ctx context.Context, query email.ReadQuery) (m
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
-		r.log.Error("failed to read roles",
+		r.log.Error("failed to repository roles",
 			zap.String("trace_id", traceId),
-			zap.String("operation", "READ"),
+			zap.String("operation", "read"),
 			zap.Error(err),
 		)
 
 		return nil, err
 	}
 
-	r.log.Info("read process complete successfully",
+	r.log.Info("repository process complete successfully",
 		zap.String("trace_id", traceId),
-		zap.String("operation", "READ"),
+		zap.String("operation", "read"),
 		zap.Any("payload", fmt.Sprintf("%v", query)),
 	)
 	return records, nil
 }
 
-func newReadQueryHandler(repo email.Read, log logger.Logger,
+func newReadQueryHandler(repo email.Repo, log logger.Logger,
 	tracer tracing.Tracer) cqrs.QueryHandle[email.ReadQuery, map[string]any] {
 	return &readQueryHandler{
-		repo: repo,
-		log: log,
+		repo:   repo,
+		log:    log,
 		tracer: tracer,
 	}
 }
