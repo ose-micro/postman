@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/ose-micro/core/dto"
+	ose_error "github.com/ose-micro/error"
 	commonv1 "github.com/ose-micro/postman/internal/api/grpc/gen/go/ose/micro/common/v1"
 )
 
@@ -176,4 +177,15 @@ func buildAppRequest(query *commonv1.Request) (*dto.Request, error) {
 	return &dto.Request{
 		Queries: facets,
 	}, nil
+}
+
+func parseError(err error) error {
+	oseErr := ose_error.CastToError(err)
+
+	err = ose_error.ToGRPCError(oseErr)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

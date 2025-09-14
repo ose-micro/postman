@@ -6,6 +6,7 @@ import (
 
 	"github.com/ose-micro/core/logger"
 	"github.com/ose-micro/core/tracing"
+	ose_error "github.com/ose-micro/error"
 	templatev1 "github.com/ose-micro/postman/internal/api/grpc/gen/go/ose/micro/postman/template/v1"
 	"github.com/ose-micro/postman/internal/app"
 	"github.com/ose-micro/postman/internal/business/template"
@@ -17,7 +18,7 @@ import (
 )
 
 type (
-	templateHandler struct {
+	TemplateHandler struct {
 		templatev1.UnimplementedTemplateServiceServer
 		app    template.App
 		log    logger.Logger
@@ -25,7 +26,7 @@ type (
 	}
 )
 
-func (e *templateHandler) response(param template.Public) *templatev1.Template {
+func (e *TemplateHandler) response(param template.Public) *templatev1.Template {
 	return &templatev1.Template{
 		Id:           param.Id,
 		Count:        param.Count,
@@ -37,9 +38,9 @@ func (e *templateHandler) response(param template.Public) *templatev1.Template {
 	}
 }
 
-func (e *templateHandler) Create(ctx context.Context, request *templatev1.CreateRequest) (*templatev1.CreateResponse, error) {
+func (e *TemplateHandler) Create(ctx context.Context, request *templatev1.CreateRequest) (*templatev1.CreateResponse, error) {
 	ctx, span := e.tracer.Start(ctx, "api.grpc.template.create.handler", trace.WithAttributes(
-		attribute.String("operation", "CREATE"),
+		attribute.String("operation", "create"),
 		attribute.String("payload", fmt.Sprintf("%v", request)),
 	))
 	defer span.End()
@@ -57,16 +58,16 @@ func (e *templateHandler) Create(ctx context.Context, request *templatev1.Create
 		span.SetStatus(codes.Error, err.Error())
 		e.log.Error("failed to create template",
 			zap.String("trace_id", traceId),
-			zap.String("operation", "CREATE"),
+			zap.String("operation", "create"),
 			zap.Error(err),
 		)
 
-		return nil, err
+		return nil, parseError(err)
 	}
 
 	e.log.Info("template create process successfully",
 		zap.String("trace_id", traceId),
-		zap.String("operation", "CREATE"),
+		zap.String("operation", "create"),
 		zap.Any("payload", request),
 	)
 
@@ -76,9 +77,9 @@ func (e *templateHandler) Create(ctx context.Context, request *templatev1.Create
 	}, nil
 }
 
-func (e *templateHandler) Read(ctx context.Context, request *templatev1.ReadRequest) (*templatev1.ReadResponse, error) {
+func (e *TemplateHandler) Read(ctx context.Context, request *templatev1.ReadRequest) (*templatev1.ReadResponse, error) {
 	ctx, span := e.tracer.Start(ctx, "api.grpc.template.repository.handler", trace.WithAttributes(
-		attribute.String("operation", "READ"),
+		attribute.String("operation", "read"),
 		attribute.String("payload", fmt.Sprintf("%v", request)),
 	))
 	defer span.End()
@@ -86,14 +87,15 @@ func (e *templateHandler) Read(ctx context.Context, request *templatev1.ReadRequ
 	traceId := trace.SpanContextFromContext(ctx).TraceID().String()
 	query, err := buildAppRequest(request.Request)
 	if err != nil {
+		err := ose_error.Wrap(err, ose_error.ErrBadRequest, err.Error(), traceId)
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
 		e.log.Error("failed to case to dto",
 			zap.String("trace_id", traceId),
-			zap.String("operation", "READ"),
+			zap.String("operation", "read"),
 			zap.Error(err),
 		)
-		return nil, err
+		return nil, parseError(err)
 	}
 
 	records, err := e.app.Read(ctx, *query)
@@ -102,37 +104,35 @@ func (e *templateHandler) Read(ctx context.Context, request *templatev1.ReadRequ
 		span.SetStatus(codes.Error, err.Error())
 		e.log.Error("failed to repository roles",
 			zap.String("trace_id", traceId),
-			zap.String("operation", "READ"),
+			zap.String("operation", "read"),
 			zap.Error(err),
 		)
-		return nil, err
+		return nil, parseError(err)
+	}
+
+	result := map[string]*templatev1.Templates{}
+
+	for k, v := range records {
+		switch x := v.(type) {
+		case []template.Public:
+			list := make([]*templatev1.Template, 0)
+			for _, v := range x {
+				list = append(list, e.response(v))
+			}
+			result[k] = &templatev1.Templates{
+				Data: list,
+			}
+		}
 	}
 
 	return &templatev1.ReadResponse{
-		Result: func() map[string]*templatev1.Templates {
-			data := map[string]*templatev1.Templates{}
-
-			for k, v := range records {
-				switch x := v.(type) {
-				case []template.Public:
-					list := make([]*templatev1.Template, 0)
-					for _, v := range x {
-						list = append(list, e.response(v))
-					}
-					data[k] = &templatev1.Templates{
-						Data: list,
-					}
-				}
-			}
-
-			return data
-		}(),
+		Result: result,
 	}, nil
 }
 
-func (r *templateHandler) Update(ctx context.Context, request *templatev1.UpdateRequest) (*templatev1.UpdateResponse, error) {
+func (r *TemplateHandler) Update(ctx context.Context, request *templatev1.UpdateRequest) (*templatev1.UpdateResponse, error) {
 	ctx, span := r.tracer.Start(ctx, "api.grpc.template.update.handler", trace.WithAttributes(
-		attribute.String("operation", "UPDATE"),
+		attribute.String("operation", "update"),
 		attribute.String("payload", fmt.Sprintf("%v", request)),
 	))
 	defer span.End()
@@ -151,10 +151,10 @@ func (r *templateHandler) Update(ctx context.Context, request *templatev1.Update
 		span.SetStatus(codes.Error, err.Error())
 		r.log.Error("failed to case to grpc",
 			zap.String("trace_id", traceId),
-			zap.String("operation", "UPDATE"),
+			zap.String("operation", "update"),
 			zap.Error(err),
 		)
-		return nil, err
+		return nil, parseError(err)
 	}
 
 	return &templatev1.UpdateResponse{
@@ -162,9 +162,9 @@ func (r *templateHandler) Update(ctx context.Context, request *templatev1.Update
 	}, nil
 }
 
-func (r *templateHandler) Delete(ctx context.Context, request *templatev1.DeleteRequest) (*templatev1.DeleteResponse, error) {
+func (r *TemplateHandler) Delete(ctx context.Context, request *templatev1.DeleteRequest) (*templatev1.DeleteResponse, error) {
 	ctx, span := r.tracer.Start(ctx, "api.grpc.template.read_one.handler", trace.WithAttributes(
-		attribute.String("operation", "READ_ONE"),
+		attribute.String("operation", "delete"),
 		attribute.String("payload", fmt.Sprintf("%v", request)),
 	))
 	defer span.End()
@@ -180,10 +180,10 @@ func (r *templateHandler) Delete(ctx context.Context, request *templatev1.Delete
 		span.SetStatus(codes.Error, err.Error())
 		r.log.Error("failed to case to grpc",
 			zap.String("trace_id", traceId),
-			zap.String("operation", "READ_ONE"),
+			zap.String("operation", "delete"),
 			zap.Error(err),
 		)
-		return nil, err
+		return nil, parseError(err)
 	}
 
 	return &templatev1.DeleteResponse{
@@ -191,8 +191,8 @@ func (r *templateHandler) Delete(ctx context.Context, request *templatev1.Delete
 	}, nil
 }
 
-func NewTemplate(apps app.Apps, log logger.Logger, tracer tracing.Tracer) *templateHandler {
-	return &templateHandler{
+func NewTemplate(apps app.Apps, log logger.Logger, tracer tracing.Tracer) *TemplateHandler {
+	return &TemplateHandler{
 		app:    apps.Template,
 		log:    log,
 		tracer: tracer,

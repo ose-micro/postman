@@ -6,6 +6,7 @@ import (
 
 	"github.com/ose-micro/core/logger"
 	"github.com/ose-micro/core/tracing"
+	ose_error "github.com/ose-micro/error"
 	emailv1 "github.com/ose-micro/postman/internal/api/grpc/gen/go/ose/micro/postman/email/v1"
 	"github.com/ose-micro/postman/internal/app"
 	"github.com/ose-micro/postman/internal/business/email"
@@ -17,7 +18,7 @@ import (
 )
 
 type (
-	emailHandler struct {
+	EmailHandler struct {
 		emailv1.UnimplementedEmailServiceServer
 		app    email.App
 		log    logger.Logger
@@ -25,7 +26,7 @@ type (
 	}
 )
 
-func (e *emailHandler) response(param email.Public) *emailv1.Email {
+func (e *EmailHandler) response(param email.Public) *emailv1.Email {
 	return &emailv1.Email{
 		Id:        param.Id,
 		Count:     param.Count,
@@ -51,7 +52,7 @@ func (e *emailHandler) response(param email.Public) *emailv1.Email {
 	}
 }
 
-func (e *emailHandler) Create(ctx context.Context, request *emailv1.CreateRequest) (*emailv1.CreateResponse, error) {
+func (e *EmailHandler) Create(ctx context.Context, request *emailv1.CreateRequest) (*emailv1.CreateResponse, error) {
 	ctx, span := e.tracer.Start(ctx, "api.grpc.email.create.handler", trace.WithAttributes(
 		attribute.String("operation", "CREATE"),
 		attribute.String("payload", fmt.Sprintf("%v", request)),
@@ -77,7 +78,7 @@ func (e *emailHandler) Create(ctx context.Context, request *emailv1.CreateReques
 			zap.Error(err),
 		)
 
-		return nil, err
+		return nil, parseError(err)
 	}
 
 	e.log.Info("email create process successfully",
@@ -92,9 +93,9 @@ func (e *emailHandler) Create(ctx context.Context, request *emailv1.CreateReques
 	}, nil
 }
 
-func (e *emailHandler) Resend(ctx context.Context, request *emailv1.ResendRequest) (*emailv1.ResendResponse, error) {
+func (e *EmailHandler) Resend(ctx context.Context, request *emailv1.ResendRequest) (*emailv1.ResendResponse, error) {
 	ctx, span := e.tracer.Start(ctx, "api.grpc.email.resend.handler", trace.WithAttributes(
-		attribute.String("operation", "RESEND"),
+		attribute.String("operation", "resend"),
 		attribute.String("payload", fmt.Sprintf("%v", request)),
 	))
 	defer span.End()
@@ -107,16 +108,16 @@ func (e *emailHandler) Resend(ctx context.Context, request *emailv1.ResendReques
 		span.SetStatus(codes.Error, err.Error())
 		e.log.Error("failed to resend verification mail",
 			zap.String("trace_id", traceId),
-			zap.String("operation", "RESEND"),
+			zap.String("operation", "resend"),
 			zap.Error(err),
 		)
 
-		return nil, err
+		return nil, parseError(err)
 	}
 
 	e.log.Info("resend verification mail process successfully",
 		zap.String("trace_id", traceId),
-		zap.String("operation", "RESEND"),
+		zap.String("operation", "resend"),
 		zap.Any("payload", request),
 	)
 
@@ -125,9 +126,9 @@ func (e *emailHandler) Resend(ctx context.Context, request *emailv1.ResendReques
 	}, nil
 }
 
-func (e *emailHandler) Read(ctx context.Context, request *emailv1.ReadRequest) (*emailv1.ReadResponse, error) {
+func (e *EmailHandler) Read(ctx context.Context, request *emailv1.ReadRequest) (*emailv1.ReadResponse, error) {
 	ctx, span := e.tracer.Start(ctx, "api.grpc.email.repository.handler", trace.WithAttributes(
-		attribute.String("operation", "READ"),
+		attribute.String("operation", "read"),
 		attribute.String("payload", fmt.Sprintf("%v", request)),
 	))
 	defer span.End()
@@ -135,11 +136,12 @@ func (e *emailHandler) Read(ctx context.Context, request *emailv1.ReadRequest) (
 	traceId := trace.SpanContextFromContext(ctx).TraceID().String()
 	query, err := buildAppRequest(request.Request)
 	if err != nil {
+		err := ose_error.Wrap(err, ose_error.ErrBadRequest, err.Error(), traceId)
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
 		e.log.Error("failed to case to dto",
 			zap.String("trace_id", traceId),
-			zap.String("operation", "READ"),
+			zap.String("operation", "read"),
 			zap.Error(err),
 		)
 		return nil, err
@@ -151,36 +153,34 @@ func (e *emailHandler) Read(ctx context.Context, request *emailv1.ReadRequest) (
 		span.SetStatus(codes.Error, err.Error())
 		e.log.Error("failed to repository roles",
 			zap.String("trace_id", traceId),
-			zap.String("operation", "READ"),
+			zap.String("operation", "read"),
 			zap.Error(err),
 		)
 		return nil, err
 	}
 
-	return &emailv1.ReadResponse{
-		Result: func() map[string]*emailv1.Emails {
-			data := map[string]*emailv1.Emails{}
+	result := map[string]*emailv1.Emails{}
 
-			for k, v := range records {
-				switch x := v.(type) {
-				case []email.Public:
-					list := make([]*emailv1.Email, 0)
-					for _, v := range x {
-						list = append(list, e.response(v))
-					}
-					data[k] = &emailv1.Emails{
-						Data: list,
-					}
-				}
+	for k, v := range records {
+		switch x := v.(type) {
+		case []email.Public:
+			list := make([]*emailv1.Email, 0)
+			for _, v := range x {
+				list = append(list, e.response(v))
 			}
+			result[k] = &emailv1.Emails{
+				Data: list,
+			}
+		}
+	}
 
-			return data
-		}(),
+	return &emailv1.ReadResponse{
+		Result: result,
 	}, nil
 }
 
-func NewEmail(apps app.Apps, log logger.Logger, tracer tracing.Tracer) *emailHandler {
-	return &emailHandler{
+func NewEmail(apps app.Apps, log logger.Logger, tracer tracing.Tracer) *EmailHandler {
+	return &EmailHandler{
 		app:    apps.Email,
 		log:    log,
 		tracer: tracer,
