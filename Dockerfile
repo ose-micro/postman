@@ -1,8 +1,11 @@
 # ----- Build Stage -----
-FROM golang:1.24.1-alpine AS builder
+FROM golang:1.25 AS builder
+
+# Ensure Go uses correct toolchain automatically
+ENV GOTOOLCHAIN=auto
 
 # Install necessary tools
-RUN apk add --no-cache git
+RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
@@ -13,25 +16,26 @@ RUN go mod download
 # Copy the entire source code
 COPY . .
 
-# Build the app
-RUN go build -o ose-postman ./cmd
+# Build statically linked binary for Alpine
+RUN CGO_ENABLED=0 GOOS=linux go build -o postman ./cmd
 
 # ----- Run Stage -----
 FROM alpine:3.18
 
-RUN apk add --no-cache tzdata
+ARG PORT=8080
 
-RUN apk --no-cache add ca-certificates
+# Install runtime dependencies
+RUN apk add --no-cache tzdata ca-certificates
 
 WORKDIR /app
 
 # Copy the built binary
-COPY --from=builder /app/ose-postman .
-COPY --from=builder /app/cmd/config.production.json ./cmd/config.production.json
+COPY --from=builder /app/postman .
 COPY --from=builder /app/cmd/config.development.json ./cmd/config.development.json
+COPY --from=builder /app/cmd/config.production.json ./cmd/config.production.json
 
 # Expose the gRPC port (adjust if needed)
-EXPOSE 50051
+ENV PORT=$PORT
 
 # Run the service
-CMD ["./ose-postman"]
+CMD ["./postman"]
