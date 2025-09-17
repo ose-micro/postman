@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	SendMailEvent string = "ose-postman.email.send-mail.event"
+	SendMailEvent string = "events.send_mail"
 )
 
 type Repo interface {
