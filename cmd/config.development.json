@@ -28,7 +28,7 @@
     "timeout": "3s",
     "user": "mongo",
     "password": "dbNktHlhhwNGlpHbGtzuXzgjaONafmce",
-    "database": "postman"
+    "database": "notification"
   },
   "mailer": {
     "host": "",

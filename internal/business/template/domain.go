@@ -15,7 +15,7 @@ type Domain struct {
 }
 
 type Public struct {
-	Id           string         `json:"id"`
+	Id           string         `json:"_id"`
 	Content      string         `json:"content"`
 	Subject      string         `json:"subject"`
 	Count        int32          `json:"count"`
