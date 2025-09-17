@@ -13,7 +13,7 @@
   },
   "nats": {
     "url": "nats://localhost:4222",
-    "name": "authora",
+    "name": "postman",
     "user": "myuser",
     "password": "mypassword",
     "timeout": "2s",
@@ -23,12 +23,12 @@
     "port": 20241
   },
   "mongo": {
-    "host": "localhost",
-    "port": 27018,
+    "host": "switchyard.proxy.rlwy.net",
+    "port": 19563,
     "timeout": "3s",
-    "user": "moriba",
-    "password": "yT7f9hK3vLqP8dX2bHcM",
-    "database": "authora"
+    "user": "mongo",
+    "password": "dbNktHlhhwNGlpHbGtzuXzgjaONafmce",
+    "database": "postman"
   },
   "mailer": {
     "host": "",

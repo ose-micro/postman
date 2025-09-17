@@ -12,7 +12,7 @@ import (
 
 func newEmailConsumer(app email.App, bus domain.Bus, log logger.Logger) {
 	// Send Event
-	bus.Subscribe(email.SendMailEvent, "postman", func(ctx context.Context, data any) error {
+	_ = bus.Subscribe(email.SendMailEvent, "postman", func(ctx context.Context, data any) error {
 		var event email.SendCommand
 		raw, err := toByte(data)
 		if err != nil {

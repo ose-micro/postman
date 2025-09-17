@@ -10,7 +10,7 @@ import (
 	mongodb "github.com/ose-micro/mongo"
 	"github.com/ose-micro/nats"
 	"github.com/ose-micro/postgres"
-	consumer "github.com/ose-micro/postman/internal/api/bus"
+	"github.com/ose-micro/postman/internal/api/bus"
 	"github.com/ose-micro/postman/internal/api/grpc"
 	"github.com/ose-micro/postman/internal/app"
 	"github.com/ose-micro/postman/internal/business"
@@ -30,7 +30,7 @@ func main() {
 			nats.New,
 			repository.InjectRepository,
 		),
-		fx.Invoke(consumer.InvokeConsumers),
+		fx.Invoke(bus.InvokeConsumers),
 		fx.Invoke(grpc.RunGRPCServer),
 	).Run()
 }
