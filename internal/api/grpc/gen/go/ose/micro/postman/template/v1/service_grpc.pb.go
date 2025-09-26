@@ -117,7 +117,7 @@ func (UnimplementedTemplateServiceServer) mustEmbedUnimplementedTemplateServiceS
 func (UnimplementedTemplateServiceServer) testEmbeddedByValue()                         {}
 
 // UnsafeTemplateServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to TemplateServiceServer will
+// Use of this api is not recommended, as added methods to TemplateServiceServer will
 // result in compilation errors.
 type UnsafeTemplateServiceServer interface {
 	mustEmbedUnimplementedTemplateServiceServer()

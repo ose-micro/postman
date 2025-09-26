@@ -117,7 +117,7 @@ func (UnimplementedEmailServiceServer) mustEmbedUnimplementedEmailServiceServer(
 func (UnimplementedEmailServiceServer) testEmbeddedByValue()                      {}
 
 // UnsafeEmailServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to EmailServiceServer will
+// Use of this api is not recommended, as added methods to EmailServiceServer will
 // result in compilation errors.
 type UnsafeEmailServiceServer interface {
 	mustEmbedUnimplementedEmailServiceServer()

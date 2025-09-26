@@ -8,7 +8,6 @@ import (
 	"github.com/ose-micro/core/domain"
 	"github.com/ose-micro/core/logger"
 	"github.com/ose-micro/postman/internal/app"
-	"github.com/ose-micro/postman/internal/business/email"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 )
@@ -17,7 +16,7 @@ func InvokeConsumers(lc fx.Lifecycle, app app.Apps, log logger.Logger, bus domai
 	lc.Append(fx.Hook{
 		OnStart: func(context.Context) error {
 			go func() {
-				eventList := []string{email.SendMailEvent}
+				eventList := []string{"postman.*"}
 				err := bus.EnsureStream("EVENT", eventList...)
 				if err != nil {
 					log.Fatal("nats stream failed", zap.Error(err))
