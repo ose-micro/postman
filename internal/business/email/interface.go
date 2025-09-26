@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	SendMailEvent string = "events.send_mail"
+	SendMailEvent string = "postman.send_mail"
 )
 
 type Repo interface {
