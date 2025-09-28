@@ -8,7 +8,6 @@ import (
 	"github.com/ose-micro/core/logger"
 	"github.com/ose-micro/core/tracing"
 	"github.com/ose-micro/cqrs"
-	"github.com/ose-micro/cqrs/bus"
 	ose_error "github.com/ose-micro/error"
 	"github.com/ose-micro/postman/internal/business"
 	"github.com/ose-micro/postman/internal/business/template"
@@ -22,7 +21,6 @@ import (
 type updateCommandHandler struct {
 	repo   template.Repo
 	log    logger.Logger
-	bus    bus.Bus
 	tracer tracing.Tracer
 	bs     business.Domain
 }
@@ -130,12 +128,11 @@ func (u *updateCommandHandler) Handle(ctx context.Context, command template.Upda
 }
 
 func newUpdateCommandHandler(bs business.Domain, repo template.Repo, log logger.Logger,
-	tracer tracing.Tracer, bus bus.Bus) cqrs.CommandHandle[template.UpdateCommand, bool] {
+	tracer tracing.Tracer) cqrs.CommandHandle[template.UpdateCommand, bool] {
 	return &updateCommandHandler{
 		repo:   repo,
 		log:    log,
 		tracer: tracer,
-		bus:    bus,
 		bs:     bs,
 	}
 }

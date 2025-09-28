@@ -8,7 +8,6 @@ import (
 	"github.com/ose-micro/core/logger"
 	"github.com/ose-micro/core/tracing"
 	"github.com/ose-micro/cqrs"
-	"github.com/ose-micro/cqrs/bus"
 	"github.com/ose-micro/postman/internal/business"
 	"github.com/ose-micro/postman/internal/business/template"
 	"go.opentelemetry.io/otel/attribute"
@@ -21,7 +20,6 @@ import (
 type deleteCommandHandler struct {
 	repo   template.Repo
 	log    logger.Logger
-	bus    bus.Bus
 	tracer tracing.Tracer
 	bs     business.Domain
 }
@@ -99,12 +97,11 @@ func (d *deleteCommandHandler) Handle(ctx context.Context, command template.Dele
 }
 
 func newDeleteCommandHandler(bs business.Domain, repo template.Repo, log logger.Logger,
-	tracer tracing.Tracer, bus bus.Bus) cqrs.CommandHandle[template.DeleteCommand, bool] {
+	tracer tracing.Tracer) cqrs.CommandHandle[template.DeleteCommand, bool] {
 	return &deleteCommandHandler{
 		repo:   repo,
 		log:    log,
 		tracer: tracer,
-		bus:    bus,
 		bs:     bs,
 	}
 }

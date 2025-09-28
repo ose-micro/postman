@@ -18,7 +18,7 @@ func InvokeConsumers(lc fx.Lifecycle, app app.Apps, log logger.Logger, bus domai
 		OnStart: func(context.Context) error {
 			go func() {
 				eventList := []string{email.SendMailEvent}
-				err := bus.EnsureStream("EVENT", eventList...)
+				err := bus.EnsureStream("POSTMAN", eventList...)
 				if err != nil {
 					log.Fatal("nats stream failed", zap.Error(err))
 				}
@@ -29,8 +29,6 @@ func InvokeConsumers(lc fx.Lifecycle, app app.Apps, log logger.Logger, bus domai
 		},
 	})
 }
-
-const QUEUE = "ose_postman_queue"
 
 func toByte(data interface{}) ([]byte, error) {
 	mapData, ok := data.(map[string]interface{})

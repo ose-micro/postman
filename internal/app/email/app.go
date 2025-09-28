@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/ose-micro/core/domain"
 	"github.com/ose-micro/core/dto"
 	"github.com/ose-micro/core/logger"
 	"github.com/ose-micro/core/tracing"
 	"github.com/ose-micro/cqrs"
-	"github.com/ose-micro/cqrs/bus"
 	"github.com/ose-micro/mailer"
 	"github.com/ose-micro/postman/internal/business"
 	"github.com/ose-micro/postman/internal/business/email"
@@ -105,7 +105,7 @@ func (r *emailApp) Resend(ctx context.Context, command email.IdCommand) error {
 }
 
 func NewEmailApp(bs business.Domain, log logger.Logger, tracer tracing.Tracer,
-	read repository.Repository, bus bus.Bus, mailer *mailer.Mailer) email.App {
+	read repository.Repository, bus domain.Bus, mailer *mailer.Mailer) email.App {
 	return &emailApp{
 		log:    log,
 		tracer: tracer,

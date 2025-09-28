@@ -14,20 +14,20 @@
   "nats": {
     "url": "nats://localhost:4222",
     "name": "postman",
-    "user": "myuser",
-    "password": "mypassword",
+    "user": "moriba",
+    "password": "yT7f9hK3vLqP8dX2bHcM",
     "timeout": "2s",
     "max_reconnect": -1
   },
   "grpc": {
-    "port": 20241
+    "port": 20247
   },
   "mongo": {
-    "host": "switchyard.proxy.rlwy.net",
-    "port": 19563,
+    "host": "localhost",
+    "port": 27017,
     "timeout": "3s",
-    "user": "mongo",
-    "password": "dbNktHlhhwNGlpHbGtzuXzgjaONafmce",
+    "user": "moriba",
+    "password": "yT7f9hK3vLqP8dX2bHcM",
     "database": "notification"
   },
   "mailer": {

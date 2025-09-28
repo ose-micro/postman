@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/ose-micro/core/domain"
 	"github.com/ose-micro/core/dto"
 	"github.com/ose-micro/core/logger"
 	"github.com/ose-micro/core/tracing"
 	"github.com/ose-micro/cqrs"
-	"github.com/ose-micro/cqrs/bus"
 	"github.com/ose-micro/mailer"
 	"github.com/ose-micro/postman/internal/business"
 	"github.com/ose-micro/postman/internal/business/template"
@@ -129,13 +129,13 @@ func (t *templateApp) Update(ctx context.Context, command template.UpdateCommand
 }
 
 func NewTemplateApp(bs business.Domain, log logger.Logger, tracer tracing.Tracer,
-	repo template.Repo, bus bus.Bus, mailer *mailer.Mailer) template.App {
+	repo template.Repo, bus domain.Bus, mailer *mailer.Mailer) template.App {
 	return &templateApp{
 		tracer: tracer,
 		log:    log,
-		create: newCreateCommandHandler(bs, repo, log, tracer, bus, mailer),
+		create: newCreateCommandHandler(bs, repo, log, tracer,  mailer),
 		read:   newReadQueryHandler(repo, log, tracer),
-		update: newUpdateCommandHandler(bs, repo, log, tracer, bus),
-		delete: newDeleteCommandHandler(bs, repo, log, tracer, bus),
+		update: newUpdateCommandHandler(bs, repo, log, tracer),
+		delete: newDeleteCommandHandler(bs, repo, log, tracer),
 	}
 }

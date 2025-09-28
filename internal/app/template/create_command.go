@@ -7,7 +7,6 @@ import (
 	"github.com/ose-micro/core/logger"
 	"github.com/ose-micro/core/tracing"
 	"github.com/ose-micro/cqrs"
-	"github.com/ose-micro/cqrs/bus"
 	ose_error "github.com/ose-micro/error"
 	"github.com/ose-micro/mailer"
 	"github.com/ose-micro/postman/internal/business"
@@ -23,7 +22,6 @@ type createCommandHandler struct {
 	repo   template.Repo
 	log    logger.Logger
 	mailer *mailer.Mailer
-	bus    bus.Bus
 	tracer tracing.Tracer
 	bs     business.Domain
 }
@@ -106,12 +104,11 @@ func (c *createCommandHandler) Handle(ctx context.Context, command template.Crea
 }
 
 func newCreateCommandHandler(bs business.Domain, repo template.Repo, log logger.Logger,
-	tracer tracing.Tracer, bus bus.Bus, mailer *mailer.Mailer) cqrs.CommandHandle[template.CreateCommand, *template.Domain] {
+	tracer tracing.Tracer, mailer *mailer.Mailer) cqrs.CommandHandle[template.CreateCommand, *template.Domain] {
 	return &createCommandHandler{
 		repo:   repo,
 		log:    log,
 		tracer: tracer,
-		bus:    bus,
 		mailer: mailer,
 		bs:     bs,
 	}

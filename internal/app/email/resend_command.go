@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/ose-micro/core/domain"
 	"github.com/ose-micro/core/dto"
 	"github.com/ose-micro/core/logger"
 	"github.com/ose-micro/core/tracing"
 	"github.com/ose-micro/cqrs"
-	"github.com/ose-micro/cqrs/bus"
 	ose_error "github.com/ose-micro/error"
 	"github.com/ose-micro/mailer"
 	"github.com/ose-micro/postman/internal/business"
@@ -24,7 +24,7 @@ import (
 type resendCommandHandler struct {
 	repo   repository.Repository
 	log    logger.Logger
-	bus    bus.Bus
+	bus    domain.Bus
 	mailer *mailer.Mailer
 	tracer tracing.Tracer
 	bs     business.Domain
@@ -141,7 +141,7 @@ func (u *resendCommandHandler) Handle(ctx context.Context, command email.IdComma
 }
 
 func newResendCommandHandler(bs business.Domain, repo repository.Repository, log logger.Logger,
-	tracer tracing.Tracer, bus bus.Bus, mailer *mailer.Mailer) cqrs.CommandHandle[email.IdCommand, *email.Domain] {
+	tracer tracing.Tracer, bus domain.Bus, mailer *mailer.Mailer) cqrs.CommandHandle[email.IdCommand, *email.Domain] {
 	return &resendCommandHandler{
 		repo:   repo,
 		log:    log,
